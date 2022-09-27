@@ -10,8 +10,8 @@ public class QuickSorter implements ListSorter {
     }
 
     private <T extends Comparable<T>> void sortPartition(List<T> collection, int start, int end) {
-        if (end - start + 1 <= 3) {
-            sort3(collection, start, end);
+        if (end - start + 1 <= 10) {
+            insertionSort(collection, start, end);
             return;
         }
 
@@ -47,21 +47,22 @@ public class QuickSorter implements ListSorter {
         return endPrt;
     }
 
-    private <T extends Comparable<T>> void sort3(List<T> collection, int start, int end) {
-        int size = end - start + 1;
+    private <T extends Comparable<T>> void insertionSort(List<T> collection, int start, int end) {
+        int outer;
+        int inner;
+        T temp;
 
-        if (size < 1) {
-            return;
-        }
+        for (outer = start + 1; outer <= end; outer++) {
+            temp = collection.get(outer);
+            inner = outer;
 
-        if (size == 2) {
-            if (collection.get(start).compareTo(collection.get(end)) > 0) {
-                collection.set(start, collection.set(end, collection.get(start)));
+            while (inner > start && collection.get(inner - 1).compareTo(temp) >= 0) {
+                collection.set(inner, collection.get(inner - 1));
+                inner--;
             }
-            return;
-        }
 
-        prepareMedian(collection, start, end);
+            collection.set(inner, temp);
+        }
     }
 
     private <T extends Comparable<T>> T prepareMedian(List<T> collection, int start, int end) {

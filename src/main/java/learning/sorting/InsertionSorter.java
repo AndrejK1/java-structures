@@ -7,9 +7,10 @@ public class InsertionSorter implements ListSorter {
     public <T extends Comparable<T>> void sort(List<T> collection) {
         int outer;
         int inner;
+        T temp;
 
         for (outer = 1; outer < collection.size(); outer++) {
-            T temp = collection.get(outer);
+            temp = collection.get(outer);
             inner = outer;
 
             while (inner > 0 && collection.get(inner - 1).compareTo(temp) >= 0) {

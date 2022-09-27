@@ -19,6 +19,17 @@ public class SortingTest {
     private final Random r = new Random();
 
     @Test
+    public void runMassiveSortingEfficiencyTest() {
+        List<ListSorter> enabledSorters = Arrays.asList(
+                ListSorters.SHELL_SORTER,
+                ListSorters.MERGE_SORTER,
+                ListSorters.QUICK_SORTER
+        );
+
+        testSortingAlgorithms(enabledSorters, 1_000_000);
+    }
+
+    @Test
     public void runAllSortingEfficiencyTest() {
         List<ListSorter> enabledSorters = Arrays.asList(
                 ListSorters.BUBBLE_SORTER
