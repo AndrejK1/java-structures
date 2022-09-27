@@ -10,14 +10,21 @@ public class QuickSorter implements ListSorter {
     }
 
     private <T extends Comparable<T>> void sortPartition(List<T> collection, int start, int end) {
-        if (start >= end) {
+        if (end - start + 1 <= 3) {
+            sort3(collection, start, end);
             return;
         }
 
-        int startPrt = start;
-        int endPrt = end;
-        T median = collection.get((start + end) / 2);
-        T buffer;
+        int newPosition = partition(collection, start, end);
+        sortPartition(collection, start, newPosition);
+        sortPartition(collection, newPosition + 1, end);
+    }
+
+    private <T extends Comparable<T>> int partition(List<T> collection, int start, int end) {
+        T median = prepareMedian(collection, start, end);
+
+        int startPrt = start + 1;
+        int endPrt = end - 1;
 
         while (true) {
             while (startPrt < end && median.compareTo(collection.get(startPrt)) > 0) {
@@ -32,15 +39,46 @@ public class QuickSorter implements ListSorter {
                 break;
             }
 
-            buffer = collection.get(startPrt);
-            collection.set(startPrt, collection.get(endPrt));
-            collection.set(endPrt, buffer);
+            collection.set(startPrt, collection.set(endPrt, collection.get(startPrt)));
 
             startPrt++;
             endPrt--;
         }
+        return endPrt;
+    }
 
-        sortPartition(collection, start, endPrt);
-        sortPartition(collection, endPrt + 1, end);
+    private <T extends Comparable<T>> void sort3(List<T> collection, int start, int end) {
+        int size = end - start + 1;
+
+        if (size < 1) {
+            return;
+        }
+
+        if (size == 2) {
+            if (collection.get(start).compareTo(collection.get(end)) > 0) {
+                collection.set(start, collection.set(end, collection.get(start)));
+            }
+            return;
+        }
+
+        prepareMedian(collection, start, end);
+    }
+
+    private <T extends Comparable<T>> T prepareMedian(List<T> collection, int start, int end) {
+        int mid = (start + end) / 2;
+
+        if (collection.get(start).compareTo(collection.get(mid)) > 0) {
+            collection.set(start, collection.set(mid, collection.get(start)));
+        }
+
+        if (collection.get(start).compareTo(collection.get(end)) > 0) {
+            collection.set(start, collection.set(end, collection.get(start)));
+        }
+
+        if (collection.get(mid).compareTo(collection.get(end)) > 0) {
+            collection.set(mid, collection.set(end, collection.get(mid)));
+        }
+
+        return collection.get(mid);
     }
 }

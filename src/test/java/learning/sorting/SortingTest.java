@@ -19,14 +19,6 @@ public class SortingTest {
     private final Random r = new Random();
 
     @Test
-    public void runForQSorting() {
-        List<Integer> collection = Arrays.asList(1, 3, 2, 45, 23, 3, 43, 1, -23, 25, 4);
-        ListSorters.QUICK_SORTER.sort(collection);
-
-        testSortingAlgorithms(Collections.singletonList(ListSorters.QUICK_SORTER), 100);
-    }
-
-    @Test
     public void runAllSortingEfficiencyTest() {
         List<ListSorter> enabledSorters = Arrays.asList(
                 ListSorters.BUBBLE_SORTER
