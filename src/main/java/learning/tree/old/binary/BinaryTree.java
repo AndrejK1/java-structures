@@ -1,6 +1,6 @@
-package learning.tree.rb;
+package learning.tree.old.binary;
 
-import learning.tree.Tree;
+import learning.tree.old.Tree;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +11,9 @@ import java.util.Queue;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
+//@Slf4j
 @RequiredArgsConstructor
-public class RBTree<T> implements Tree<T> {
+public class BinaryTree<T> implements Tree<T> {
     private final BiFunction<T, T, Integer> comparator;
     private Node<T> root;
 

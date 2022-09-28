@@ -1,4 +1,4 @@
-package learning.tree.binary;
+package learning.tree.old.binary;
 
 public class IntegerTree extends BinaryTree<Integer> {
 

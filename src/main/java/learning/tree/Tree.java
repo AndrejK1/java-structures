@@ -1,13 +1,24 @@
 package learning.tree;
 
+import additional.ADT;
+
 import java.util.function.Consumer;
 
-public interface Tree<T> {
-    void add(T value);
+public interface Tree<T extends Comparable<T>> extends ADT {
+    boolean add(T element);
 
-    void remove(T value);
+    boolean remove(T element);
 
-    void forEach(Consumer<T> action);
+    boolean contains(T element);
 
-    void print();
+    int size();
+    int height();
+
+    void clear();
+
+    default void forEach(Consumer<T> action) {
+        forEach(TreeTraversal.INORDER, action);
+    }
+
+    void forEach(TreeTraversal treeTraversalType, Consumer<T> action);
 }
