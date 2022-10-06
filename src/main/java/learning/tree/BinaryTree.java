@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 
 public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     private int size;
-    private Node<T> root;
+    private BinaryNode<T> root;
 
     @Override
     public boolean add(T element) {
@@ -19,12 +19,12 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         return true;
     }
 
-    private Node<T> innerAdd(Node<T> current, T value) {
+    private BinaryNode<T> innerAdd(BinaryNode<T> current, T value) {
         if (current == null) {
-            return new Node<>(value);
+            return new BinaryNode<>(value);
         }
 
-        if (current.data.compareTo(value) > 0) {
+        if (current.value.compareTo(value) > 0) {
             current.leftChild = innerAdd(current.leftChild, value);
         } else {
             current.rightChild = innerAdd(current.rightChild, value);
@@ -34,33 +34,59 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     }
 
     @Override
+    public boolean addSubTree(Tree<T> subTree) {
+        if (!(subTree instanceof BinaryTree)) {
+            throw new IllegalArgumentException("Subtree must be BinaryTree type");
+        }
+
+        BinaryNode<T> subTreeRoot = ((BinaryTree<T>) subTree).root;
+
+        root = innerAddSubTree(root, subTreeRoot);
+        size += calculateSize(subTreeRoot);
+        return true;
+    }
+
+    private BinaryNode<T> innerAddSubTree(BinaryNode<T> current, BinaryNode<T> subTree) {
+        if (current == null) {
+            return subTree;
+        }
+
+        if (current.value.compareTo(subTree.getValue()) > 0) {
+            current.leftChild = innerAddSubTree(current.leftChild, subTree);
+        } else {
+            current.rightChild = innerAddSubTree(current.rightChild, subTree);
+        }
+
+        return current;
+    }
+    @Override
     public boolean remove(T element) {
         int previousSize = size;
         root = innerRemove(root, element);
         return previousSize > size;
     }
 
-    private Node<T> innerRemove(Node<T> current, T value) {
+    private BinaryNode<T> innerRemove(BinaryNode<T> current, T value) {
         if (current == null) {
             return null;
         }
 
-        if (current.data.compareTo(value) == 0) {
+        if (current.value.compareTo(value) == 0) {
             if (current.leftChild == null && current.rightChild == null) {
                 size--;
                 return null;
             } else if (current.rightChild == null) {
-                Node<T> predecessor = predecessor(current);
-                current.data = predecessor.data;
-                current.leftChild = innerRemove(current.leftChild, current.data);
+                BinaryNode<T> predecessor = predecessor(current);
+                current.value = predecessor.value;
+                current.leftChild = innerRemove(current.leftChild, current.value);
             } else {
-                Node<T> successor = successor(current);
-                current.data = successor.data;
-                current.rightChild = innerRemove(current.rightChild, current.data);
+                BinaryNode<T> successor = successor(current);
+                current.value = successor.value;
+                current.rightChild = innerRemove(current.rightChild, current.value);
             }
         }
 
-        if (current.data.compareTo(value) > 0) {
+        if (current.value.compareTo(value) > 0) {
             current.leftChild = innerRemove(current.leftChild, value);
         } else {
             current.rightChild = innerRemove(current.rightChild, value);
@@ -69,8 +95,8 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         return current;
     }
 
-    private Node<T> successor(Node<T> node) {
-        Node<T> current = node.rightChild;
+    private BinaryNode<T> successor(BinaryNode<T> node) {
+        BinaryNode<T> current = node.rightChild;
 
         while (current.leftChild != null) {
             current = current.leftChild;
@@ -79,8 +105,8 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         return current;
     }
 
-    private Node<T> predecessor(Node<T> node) {
-        Node<T> current = node.leftChild;
+    private BinaryNode<T> predecessor(BinaryNode<T> node) {
+        BinaryNode<T> current = node.leftChild;
 
         while (current.rightChild != null) {
             current = current.rightChild;
@@ -94,16 +120,16 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         return innerContains(root, element);
     }
 
-    private boolean innerContains(Node<T> current, T value) {
+    private boolean innerContains(BinaryNode<T> current, T value) {
         if (current == null) {
             return false;
         }
 
-        if (current.data.compareTo(value) == 0) {
+        if (current.value.compareTo(value) == 0) {
             return true;
         }
 
-        if (current.data.compareTo(value) > 0) {
+        if (current.value.compareTo(value) > 0) {
             return innerContains(current.leftChild, value);
         }
 
@@ -139,34 +165,34 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         }
     }
 
-    private void forEachInorder(Node<T> current, Consumer<T> action) {
+    private void forEachInorder(BinaryNode<T> current, Consumer<T> action) {
         if (current == null) {
             return;
         }
 
         forEachInorder(current.leftChild, action);
-        action.accept(current.data);
+        action.accept(current.value);
         forEachInorder(current.rightChild, action);
     }
 
-    private void forEachPreorder(Node<T> current, Consumer<T> action) {
+    private void forEachPreorder(BinaryNode<T> current, Consumer<T> action) {
         if (current == null) {
             return;
         }
 
-        action.accept(current.data);
+        action.accept(current.value);
         forEachPreorder(current.leftChild, action);
         forEachPreorder(current.rightChild, action);
     }
 
-    private void forEachPostorder(Node<T> current, Consumer<T> action) {
+    private void forEachPostorder(BinaryNode<T> current, Consumer<T> action) {
         if (current == null) {
             return;
         }
 
         forEachPostorder(current.leftChild, action);
         forEachPostorder(current.rightChild, action);
-        action.accept(current.data);
+        action.accept(current.value);
     }
 
     private void forEachByLayers(Consumer<T> action) {
@@ -174,14 +200,14 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
             return;
         }
 
-        Queue<Node<T>> nodes = new LinkedList<>();
+        Queue<BinaryNode<T>> nodes = new LinkedList<>();
 
         nodes.add(root);
 
         while (!nodes.isEmpty()) {
-            Node<T> node = nodes.poll();
+            BinaryNode<T> node = nodes.poll();
 
-            action.accept(node.data);
+            action.accept(node.value);
 
             if (node.leftChild != null) {
                 nodes.add(node.leftChild);
@@ -193,6 +219,14 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         }
     }
 
+    private int calculateSize(Node<T> current) {
+        if (current == null) {
+            return 0;
+        }
+
+        return 1 + calculateSize(current.getLeftChild()) + calculateSize(current.getRightChild());
+    }
+
     public int height() {
         if (size <= 1) {
             return size;
@@ -201,7 +235,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         return getMaxLeafHeight(root, 0);
     }
 
-    private int getMaxLeafHeight(Node<T> node, int currentHeight) {
+    private int getMaxLeafHeight(BinaryNode<T> node, int currentHeight) {
         if (node == null) {
             return currentHeight;
         }
@@ -232,18 +266,18 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     @Setter
     @Getter
     @AllArgsConstructor
-    private static class Node<T> {
-        private T data;
-        private Node<T> leftChild;
-        private Node<T> rightChild;
+    private static class BinaryNode<T> implements Node<T> {
+        private T value;
+        private BinaryNode<T> leftChild;
+        private BinaryNode<T> rightChild;
 
-        public Node(T data) {
-            this.data = data;
+        public BinaryNode(T value) {
+            this.value = value;
         }
 
         @Override
         public String toString() {
-            return "Node{" + " data= " + data +
+            return "Node{" + " value = " + value +
                     ", l: " + (leftChild == null ? "n" : "y") +
                     ", r: " + (rightChild == null ? "n" : "y") +
                     " }";

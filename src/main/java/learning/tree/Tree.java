@@ -7,6 +7,8 @@ import java.util.function.Consumer;
 public interface Tree<T extends Comparable<T>> extends ADT {
     boolean add(T element);
 
+    boolean addSubTree(Tree<T> element);
+
     boolean remove(T element);
 
     boolean contains(T element);
@@ -21,4 +23,10 @@ public interface Tree<T extends Comparable<T>> extends ADT {
     }
 
     void forEach(TreeTraversal treeTraversalType, Consumer<T> action);
+
+    interface Node<T> {
+        Node<T> getLeftChild();
+        Node<T> getRightChild();
+        T getValue();
+    }
 }
