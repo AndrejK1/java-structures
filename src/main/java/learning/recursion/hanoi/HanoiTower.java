@@ -1,6 +1,6 @@
 package learning.recursion.hanoi;
 
-import learning.list.LinkedList;
+import learning.list.SimpleLinkedList;
 import learning.list.MutableList;
 
 import java.util.HashMap;
@@ -64,9 +64,9 @@ public class HanoiTower {
         this.height = height;
         this.estimatedTurns = Math.round(Math.pow(2, height)) - 1;
 
-        towers.put(A, new LinkedList<>());
-        towers.put(B, new LinkedList<>());
-        towers.put(C, new LinkedList<>());
+        towers.put(A, new SimpleLinkedList<>());
+        towers.put(B, new SimpleLinkedList<>());
+        towers.put(C, new SimpleLinkedList<>());
 
         IntStream.rangeClosed(1, height)
                 .boxed()

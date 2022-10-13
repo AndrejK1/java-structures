@@ -4,7 +4,7 @@ import additional.StringStructureSupport;
 import learning.queue.Queue;
 import lombok.AllArgsConstructor;
 
-public class LinkedList<T> implements MutableList<T>, Queue<T> {
+public class SimpleLinkedList<T> implements MutableList<T>, Queue<T> {
     private Node<T> first;
     private Node<T> last;
     private int size;
