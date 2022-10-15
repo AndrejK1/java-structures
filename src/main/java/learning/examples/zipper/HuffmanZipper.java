@@ -1,7 +1,7 @@
 package learning.examples.zipper;
 
 
-import learning.queue.PriorityQueue;
+import learning.queue.ComparablePriorityQueue;
 import learning.tree.Tree;
 import learning.tree.utils.MutableNode;
 import learning.tree.utils.TreeUtils;
@@ -22,7 +22,7 @@ public class HuffmanZipper {
         }
 
         Map<Character, Integer> characterIntegerMap = toCharacterOccurrenceFrequency(str);
-        PriorityQueue<MutableNode<CharWeight>> charPriorityQueue = toPriorityQueue(characterIntegerMap);
+        ComparablePriorityQueue<MutableNode<CharWeight>> charPriorityQueue = toPriorityQueue(characterIntegerMap);
         MutableNode<CharWeight> tree = buildTree(charPriorityQueue);
         Map<Character, String> characterCodeMap = buildCodeMap(tree);
         String zip = zipString(str, characterCodeMap);
@@ -70,7 +70,7 @@ public class HuffmanZipper {
         return encoded.toString();
     }
 
-    private MutableNode<CharWeight> buildTree(PriorityQueue<MutableNode<CharWeight>> charPriorityQueue) {
+    private MutableNode<CharWeight> buildTree(ComparablePriorityQueue<MutableNode<CharWeight>> charPriorityQueue) {
         if (charPriorityQueue.size() == 1) {
             MutableNode<CharWeight> singleChar = charPriorityQueue.pop();
 
@@ -113,8 +113,8 @@ public class HuffmanZipper {
         return characterOccurrenceFrequencyMap;
     }
 
-    private PriorityQueue<MutableNode<CharWeight>> toPriorityQueue(Map<Character, Integer> characterIntegerMap) {
-        PriorityQueue<MutableNode<CharWeight>> charPriority = new PriorityQueue<>(Comparator.comparing(Tree.Node::getValue));
+    private ComparablePriorityQueue<MutableNode<CharWeight>> toPriorityQueue(Map<Character, Integer> characterIntegerMap) {
+        ComparablePriorityQueue<MutableNode<CharWeight>> charPriority = new ComparablePriorityQueue<>(Comparator.comparing(Tree.Node::getValue));
         characterIntegerMap.forEach((ch, w) -> charPriority.push(TreeUtils.binaryNodeOf(new CharWeight(w, ch))));
         return charPriority;
     }

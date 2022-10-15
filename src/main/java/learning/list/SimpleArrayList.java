@@ -52,7 +52,7 @@ public class SimpleArrayList<T> implements MutableList<T> {
     public T remove(int position) {
         T element = get(position);
         shiftArrayLeft(position);
-        size--;
+        elements[--size] = null;
         return element;
     }
 
@@ -65,7 +65,7 @@ public class SimpleArrayList<T> implements MutableList<T> {
         }
 
         shiftArrayLeft(pos);
-        size--;
+        elements[--size] = null;
 
         return true;
     }
