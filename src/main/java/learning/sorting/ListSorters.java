@@ -10,5 +10,6 @@ public class ListSorters {
     public static final ListSorter SELECTION_SORTER = new SelectionSorter();
     public static final ListSorter MERGE_SORTER = new MergeSorter();
     public static final ListSorter SHELL_SORTER = new ShellSorter();
+    public static final ListSorter PYRAMID_SORTER = new PyramidSorter();
     public static final ListSorter QUICK_SORTER = new QuickSorter();
 }

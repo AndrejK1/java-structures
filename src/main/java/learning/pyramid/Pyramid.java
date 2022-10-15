@@ -1,33 +1,42 @@
 package learning.pyramid;
 
-import learning.list.MutableList;
-import learning.list.SimpleArrayList;
-import learning.queue.PriorityQueue;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import learning.queue.Queue;
 
-public class Pyramid<T> implements PriorityQueue<T> {
-    private final int defaultPriority;
-    private final MutableList<Node<T>> elements;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * created mainly for sorting
+ */
+public class Pyramid<T extends Comparable<T>> implements Queue<T> {
+    private final List<T> elements;
+    private int size;
 
     public Pyramid() {
-        this(16, Integer.MAX_VALUE / 2);
+        this(16);
     }
 
-    public Pyramid(int size, int defaultPriority) {
-        this.elements = new SimpleArrayList<>(size);
-        this.defaultPriority = defaultPriority;
+    public Pyramid(int size) {
+        this.elements = new ArrayList<>(size);
+    }
+
+    private Pyramid(List<T> elements) {
+        this.elements = elements;
+        this.size = elements.size();
+
+        for (int i = size / 2 - 1; i >= 0; i--) {
+            moveDown(i);
+        }
+    }
+
+    public static <T extends Comparable<T>> Pyramid<T> fromList(List<T> listToReorder) {
+        return new Pyramid<>(listToReorder);
     }
 
     @Override
     public void push(T element) {
-        this.push(element, defaultPriority);
-    }
-
-    @Override
-    public void push(T element, int priority) {
-        elements.add(new Node<>(priority, element));
-        moveUp(elements.size() - 1);
+        elements.add(element);
+        moveUp(size++);
     }
 
     @Override
@@ -36,30 +45,47 @@ public class Pyramid<T> implements PriorityQueue<T> {
             throw new IllegalStateException("Pyramid is empty!");
         }
 
-        if (elements.size() == 1) {
-            return elements.remove(0).data;
+        if (size == 1) {
+            return elements.remove(--size);
         }
 
-        Node<T> first = elements.get(0);
-        elements.set(elements.remove(elements.size() - 1), 0);
+        T first = elements.get(0);
+        elements.set(0, elements.remove(--size));
         moveDown(0);
 
-        return first.data;
+        return first;
+    }
+
+    public T popWithoutClear() {
+        if (isEmpty()) {
+            throw new IllegalStateException("Pyramid is empty!");
+        }
+
+        if (size == 1) {
+            return elements.get(--size);
+        }
+
+        T first = elements.get(0);
+        elements.set(0, elements.get(--size));
+        moveDown(0);
+
+        return first;
     }
 
     @Override
     public T peek() {
-        return elements.get(0).getData();
+        return elements.get(0);
     }
 
     @Override
     public void clear() {
         elements.clear();
+        size = 0;
     }
 
     @Override
     public boolean isEmpty() {
-        return elements.size() == 0;
+        return size == 0;
     }
 
     @Override
@@ -69,78 +95,54 @@ public class Pyramid<T> implements PriorityQueue<T> {
 
     @Override
     public String showStructure() {
-        return "Pyramid:\nelements: " + elements.showStructure();
+        return "Pyramid:\nelements: " + elements;
     }
 
     private void moveUp(int currentIndex) {
-        Node<T> newNode = elements.get(currentIndex);
+        T newNode = elements.get(currentIndex);
         int parentPosition;
 
         while (currentIndex > 0) {
-            parentPosition = getParentPosition(currentIndex);
+            parentPosition = (currentIndex - 1) / 2;
 
-            if (elements.get(parentPosition).priority > newNode.priority) {
+            if (elements.get(parentPosition).compareTo(newNode) >= 0) {
                 break;
             }
 
-            elements.set(elements.get(parentPosition), currentIndex);
+            elements.set(currentIndex, elements.get(parentPosition));
             currentIndex = parentPosition;
         }
 
-        elements.set(newNode, currentIndex);
+        elements.set(currentIndex, newNode);
     }
 
     private void moveDown(int currentIndex) {
-        int count = elements.size();
-        Node<T> top = elements.get(currentIndex);
+        int count = size;
+        T top = elements.get(currentIndex);
 
         int leftChildPosition;
         int rightChildPosition;
         int largerChild;
 
         while (currentIndex < count / 2) {
-            leftChildPosition = getLeftChildPosition(currentIndex);
-            rightChildPosition = getRightChildPosition(currentIndex);
+            leftChildPosition = 2 * currentIndex + 1;
+            rightChildPosition = leftChildPosition + 1;
 
             if (rightChildPosition < count &&
-                    elements.get(rightChildPosition).priority > elements.get(leftChildPosition).priority) {
+                    elements.get(rightChildPosition).compareTo(elements.get(leftChildPosition)) > 0) {
                 largerChild = rightChildPosition;
             } else {
                 largerChild = leftChildPosition;
             }
 
-            if (elements.get(largerChild).priority <= top.priority) {
+            if (top.compareTo(elements.get(largerChild)) >= 0) {
                 break;
             }
 
-            elements.set(elements.get(largerChild), currentIndex);
+            elements.set(currentIndex, elements.get(largerChild));
             currentIndex = largerChild;
         }
 
-        elements.set(top, currentIndex);
-    }
-
-    private int getLeftChildPosition(int pos) {
-        return 2 * pos + 1;
-    }
-
-    private int getRightChildPosition(int pos) {
-        return 2 * pos + 2;
-    }
-
-    private int getParentPosition(int pos) {
-        return (pos - 1) / 2;
-    }
-
-    @Getter
-    @AllArgsConstructor
-    private static class Node<T> {
-        private int priority;
-        private T data;
-
-        @Override
-        public String toString() {
-            return priority + ": " + data;
-        }
+        elements.set(currentIndex, top);
     }
 }

@@ -23,10 +23,11 @@ public class SortingTest {
         List<ListSorter> enabledSorters = Arrays.asList(
                 ListSorters.SHELL_SORTER,
                 ListSorters.MERGE_SORTER,
+                ListSorters.PYRAMID_SORTER,
                 ListSorters.QUICK_SORTER
         );
 
-        testSortingAlgorithms(enabledSorters, 1_000_000);
+        testSortingAlgorithms(enabledSorters, 10_000_000);
     }
 
     @Test
@@ -37,6 +38,7 @@ public class SortingTest {
                 , ListSorters.INSERTION_SORTER
                 , ListSorters.SHELL_SORTER
                 , ListSorters.MERGE_SORTER
+                , ListSorters.PYRAMID_SORTER
                 , ListSorters.QUICK_SORTER
         );
 
