@@ -30,6 +30,20 @@ public class SimpleLinkedList<T> implements MutableList<T>, Queue<T> {
         }
     }
 
+
+    @Override
+    public void set(T element, int position) {
+        checkSize(position);
+
+        Node<T> result = first;
+
+        for (int i = 0; i < position; i++) {
+            result = result.next;
+        }
+
+        result.value = element;
+    }
+
     @Override
     public T get(int position) {
         checkSize(position);

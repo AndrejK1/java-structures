@@ -12,6 +12,10 @@ public class SimpleArrayList<T> implements MutableList<T> {
         this(16, 1.5f);
     }
 
+    public SimpleArrayList(int size) {
+        this(size, 1.5f);
+    }
+
     public SimpleArrayList(int size, float sizeMultiplier) {
         this.sizeMultiplier = sizeMultiplier;
         elements = new Object[size];
@@ -30,6 +34,12 @@ public class SimpleArrayList<T> implements MutableList<T> {
         shiftArrayRight(position);
         elements[position] = element;
         size++;
+    }
+
+    @Override
+    public void set(T element, int position) {
+        checkSize(position);
+        elements[position] = element;
     }
 
     @Override

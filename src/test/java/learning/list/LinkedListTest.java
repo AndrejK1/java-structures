@@ -71,5 +71,11 @@ public class LinkedListTest {
         largeList.forEach(list::add);
         Assert.assertEquals(largeList.size(), list.size());
         largeList.forEach(v -> Assert.assertTrue(list.contains(v)));
+
+        list.set(34, 3);
+
+        Assert.assertEquals(largeList.size(), list.size());
+        Assert.assertEquals(34, list.get(3).intValue());
+        Assert.assertTrue(list.contains(34));
     }
 }
