@@ -20,7 +20,7 @@ public class ListTest {
         innerListTest(new SimpleArrayList<>());
     }
 
-    private static void innerListTest(MutableList<Integer> list) {
+    private void innerListTest(MutableList<Integer> list) {
         Assert.assertEquals(0, list.size());
         Assert.assertFalse(list.contains(0));
 

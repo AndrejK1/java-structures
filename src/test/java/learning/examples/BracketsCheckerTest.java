@@ -1,9 +1,12 @@
 package learning.examples;
 
 import org.junit.Assert;
+import org.junit.Test;
 
 public class BracketsCheckerTest {
-    public static void main(String[] args) {
+
+    @Test
+    public void testBrackets() {
         Assert.assertFalse(BracketsChecker.haveCorrectBrackets(")"));
         Assert.assertFalse(BracketsChecker.haveCorrectBrackets("[)"));
         Assert.assertFalse(BracketsChecker.haveCorrectBrackets("{)}"));

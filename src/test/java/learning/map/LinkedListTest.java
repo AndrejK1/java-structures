@@ -10,15 +10,6 @@ import java.util.List;
 @Slf4j
 public class LinkedListTest {
 
-    private static void assertEmpty(SimpleMap<String, Integer> map) {
-        Assert.assertEquals(0, map.size());
-        Assert.assertFalse(map.containsValue(1));
-        Assert.assertFalse(map.containsKey("a"));
-        Assert.assertNull(map.remove("a"));
-        Assert.assertNull(map.get("a"));
-        Assert.assertNull(map.get("b"));
-    }
-
     @Test
     public void testShiftMap() {
         SimpleMap<String, Integer> map = new LinearShiftHashMap<>();
@@ -77,5 +68,14 @@ public class LinkedListTest {
 
         map.clear();
         assertEmpty(map);
+    }
+
+    private void assertEmpty(SimpleMap<String, Integer> map) {
+        Assert.assertEquals(0, map.size());
+        Assert.assertFalse(map.containsValue(1));
+        Assert.assertFalse(map.containsKey("a"));
+        Assert.assertNull(map.remove("a"));
+        Assert.assertNull(map.get("a"));
+        Assert.assertNull(map.get("b"));
     }
 }

@@ -1,16 +1,13 @@
-package learning.recursion;
+package learning.examples.recursion;
 
-import learning.recursion.bag.Bag;
-import learning.recursion.bag.BagResults;
+import learning.examples.recursion.bag.Bag;
+import learning.examples.recursion.bag.BagResults;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 @Slf4j
 public class BagTest {

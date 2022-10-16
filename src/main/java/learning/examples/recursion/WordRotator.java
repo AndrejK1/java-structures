@@ -1,4 +1,4 @@
-package learning.recursion;
+package learning.examples.recursion;
 
 import java.util.Collections;
 import java.util.HashSet;

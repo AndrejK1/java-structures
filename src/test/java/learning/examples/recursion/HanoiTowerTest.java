@@ -1,7 +1,7 @@
-package learning.recursion;
+package learning.examples.recursion;
 
-import learning.recursion.hanoi.HanoiCallbackSummary;
-import learning.recursion.hanoi.HanoiTower;
+import learning.examples.recursion.hanoi.HanoiCallbackSummary;
+import learning.examples.recursion.hanoi.HanoiTower;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,5 +1,6 @@
-package learning.recursion;
+package learning.examples.recursion;
 
+import learning.examples.recursion.WordRotator;
 import org.junit.Assert;
 import org.junit.Test;
 

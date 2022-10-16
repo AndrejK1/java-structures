@@ -1,4 +1,4 @@
-package learning.recursion.hanoi;
+package learning.examples.recursion.hanoi;
 
 import learning.list.List;
 import lombok.AllArgsConstructor;

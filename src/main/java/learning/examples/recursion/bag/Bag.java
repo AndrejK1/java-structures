@@ -1,4 +1,4 @@
-package learning.recursion.bag;
+package learning.examples.recursion.bag;
 
 import lombok.RequiredArgsConstructor;
 

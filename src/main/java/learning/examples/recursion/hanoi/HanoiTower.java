@@ -1,4 +1,4 @@
-package learning.recursion.hanoi;
+package learning.examples.recursion.hanoi;
 
 import learning.list.SimpleLinkedList;
 import learning.list.MutableList;
