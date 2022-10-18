@@ -28,6 +28,11 @@ class AdjustableSquareMatrix<T> {
         return matrix.length;
     }
 
+
+    public void clear() {
+        clear(null);
+    }
+
     public void clear(T value) {
         fill(value);
     }

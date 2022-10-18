@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class SimpleGraph implements WeightedGraph {
@@ -27,25 +26,23 @@ public class SimpleGraph implements WeightedGraph {
     private final Graph.WeightType graphWeightType;
 
     private final List<Graph.Vertex> vertexes;
-    private final AdjustableSquareMatrix<Double> matrix;
+    private final AdjustableSquareMatrix<Double> adjacencyMatrix;
 
     public SimpleGraph() {
-        this(16, DirectionType.NON_DIRECTED, WeightType.NON_WEIGHTED);
+        this(16, Graph.DirectionType.NON_DIRECTED, Graph.WeightType.NON_WEIGHTED);
     }
 
     public SimpleGraph(int expectedSize, Graph.DirectionType directionType, Graph.WeightType weightType) {
         this.graphDirectionType = directionType;
         this.graphWeightType = weightType;
         this.vertexes = new ArrayList<>(expectedSize);
-        this.matrix = new AdjustableSquareMatrix<>(expectedSize, null);
+        this.adjacencyMatrix = new AdjustableSquareMatrix<>(expectedSize);
     }
 
-    public SimpleGraph(Graph.DirectionType graphDirectionType, Graph.WeightType weightType,
+    public SimpleGraph(Graph.DirectionType directionType, Graph.WeightType weightType,
                        List<? extends Graph.Vertex> vertexes, List<? extends Graph.Edge> edges) {
-        this.graphDirectionType = graphDirectionType;
-        this.graphWeightType = weightType;
-        this.vertexes = new ArrayList<>(vertexes);
-        this.matrix = new AdjustableSquareMatrix<>(vertexes.size(), null);
+        this(vertexes.size(), directionType, weightType);
+        vertexes.forEach(this::addVertex);
         edges.forEach(this::addEdge);
     }
 
@@ -55,10 +52,10 @@ public class SimpleGraph implements WeightedGraph {
 
         double edgeWeightValue = edge.isWeighted() ? edge.getWeight() : 1D;
 
-        matrix.set(edge.getStartVertexId(), edge.getEndVertexId(), edgeWeightValue);
+        adjacencyMatrix.set(edge.getStartVertexId(), edge.getEndVertexId(), edgeWeightValue);
 
-        if (Edge.DirectionType.NON_DIRECTED == edge.getDirectionType()) {
-            matrix.set(edge.getEndVertexId(), edge.getStartVertexId(), edgeWeightValue);
+        if (Graph.Edge.DirectionType.NON_DIRECTED == edge.getDirectionType()) {
+            adjacencyMatrix.set(edge.getEndVertexId(), edge.getStartVertexId(), edgeWeightValue);
         }
 
         return true;
@@ -66,13 +63,21 @@ public class SimpleGraph implements WeightedGraph {
 
     @Override
     public int addVertex(Graph.Vertex vertex) {
+        validateVertex(vertex);
         vertexes.add(vertex);
         return vertexes.size() - 1;
     }
 
     @Override
     public Graph.Vertex getVertexById(int id) {
+        validateVertexId(id);
         return vertexes.get(id);
+    }
+
+    @Override
+    public boolean areAdjacent(int startVertexId, int endVertexId) {
+        validateEdgeVertexIds(startVertexId, endVertexId);
+        return adjacencyMatrix.get(startVertexId, endVertexId) != null;
     }
 
     @Override
@@ -83,11 +88,13 @@ public class SimpleGraph implements WeightedGraph {
     @Override
     public void clear() {
         vertexes.clear();
-        matrix.clear(null);
+        adjacencyMatrix.clear();
     }
 
     @Override
     public void dfs(int startVertexId, BiConsumer<Integer, Graph.Vertex> action) {
+        requireNotNull(action, "Action");
+
         if (vertexes.isEmpty()) {
             return;
         }
@@ -120,6 +127,8 @@ public class SimpleGraph implements WeightedGraph {
 
     @Override
     public void bfs(int startVertexId, BiConsumer<Integer, Graph.Vertex> action) {
+        requireNotNull(action, "Action");
+
         if (vertexes.isEmpty()) {
             return;
         }
@@ -139,7 +148,6 @@ public class SimpleGraph implements WeightedGraph {
         while (!vertexQueue.isEmpty()) {
             Integer currentVertex = vertexQueue.pop();
 
-
             while (!(vertexBufferId = findAdjustedUnvisited(currentVertex, visitedVertexes)).equals(INVALID_ID)) {
                 visitedVertexes.add(vertexBufferId);
                 vertexQueue.push(vertexBufferId);
@@ -151,12 +159,12 @@ public class SimpleGraph implements WeightedGraph {
     @Override
     public Graph mst(int startVertexId) {
         if (vertexes.isEmpty()) {
-            return new SimpleGraph(0, DirectionType.NON_DIRECTED, WeightType.NON_WEIGHTED);
+            return new SimpleGraph(0, Graph.DirectionType.NON_DIRECTED, Graph.WeightType.NON_WEIGHTED);
         }
 
         validateVertexId(startVertexId);
 
-        List<Pair<Integer, Vertex>> mstVertexes = new ArrayList<>();
+        List<Pair<Integer, Graph.Vertex>> mstVertexes = new ArrayList<>();
         dfs(startVertexId, (id, v) -> mstVertexes.add(Pair.of(id, new SimpleVertex(v.getName()))));
 
         List<Edge> edges = new ArrayList<>();
@@ -164,14 +172,13 @@ public class SimpleGraph implements WeightedGraph {
             edges.add(SimpleEdge.nonDirected(mstVertexes.get(i - 1).getKey(), mstVertexes.get(i).getKey()));
         }
 
-        return new SimpleGraph(DirectionType.NON_DIRECTED, WeightType.NON_WEIGHTED,
-                mstVertexes.stream().map(Pair::getValue).collect(Collectors.toList()),
-                edges);
+        return new SimpleGraph(Graph.DirectionType.NON_DIRECTED, Graph.WeightType.NON_WEIGHTED,
+                mstVertexes.stream().map(Pair::getValue).collect(Collectors.toList()), edges);
     }
 
     @Override
     public WeightedGraph mstw() {
-        if (graphWeightType != WeightType.WEIGHTED) {
+        if (graphWeightType != Graph.WeightType.WEIGHTED) {
             throw new IllegalStateException("Graph type must be WEIGHTED");
         }
 
@@ -179,8 +186,8 @@ public class SimpleGraph implements WeightedGraph {
     }
 
     private Integer findAdjustedUnvisited(int id, Set<Integer> visitedVertexes) {
-        for (int i = 0; i < matrix.width(); i++) {
-            Double relationWeight = matrix.get(id, i);
+        for (int i = 0; i < adjacencyMatrix.width(); i++) {
+            Double relationWeight = adjacencyMatrix.get(id, i);
 
             if (relationWeight != null && !visitedVertexes.contains(i)) {
                 return i;
@@ -190,28 +197,45 @@ public class SimpleGraph implements WeightedGraph {
         return INVALID_ID;
     }
 
+    private void requireNotNull(Object o, String title) {
+        if (o == null) {
+            throw new IllegalArgumentException(title + " is null");
+        }
+    }
+
+    private void validateVertex(Graph.Vertex vertex) {
+        requireNotNull(vertex, "Vertex");
+
+        if (vertex.getName() == null) {
+            throw new IllegalArgumentException("Vertex name is null");
+        }
+    }
+
     private void validateEdge(Graph.Edge edge) {
-        validateVertexId(edge.getStartVertexId());
-        validateVertexId(edge.getEndVertexId());
+        requireNotNull(edge, "Edge");
+        requireNotNull(edge.getDirectionType(), "Edge direction type");
 
-        if (edge.getStartVertexId() == edge.getEndVertexId()) {
-            throw new IllegalArgumentException("Edge start matches it's end");
-        }
+        validateEdgeVertexIds(edge.getStartVertexId(), edge.getEndVertexId());
 
-        if (edge.getDirectionType() == null) {
-            throw new IllegalArgumentException("Direction type is null");
-        }
-
-        if (graphDirectionType != DirectionType.MIXED && !isEdgeTypeTheSame(edge)) {
+        if (graphDirectionType != Graph.DirectionType.MIXED && !isEdgeTypeTheSame(edge)) {
             throw new IllegalArgumentException("Edge type must be " + graphDirectionType);
         }
 
-        if (graphWeightType == WeightType.WEIGHTED && !edge.isWeighted()) {
+        if (graphWeightType == Graph.WeightType.WEIGHTED && !edge.isWeighted()) {
             throw new IllegalArgumentException("Edge must have weight");
         }
 
-        if (graphWeightType == WeightType.NON_WEIGHTED && edge.isWeighted()) {
+        if (graphWeightType == Graph.WeightType.NON_WEIGHTED && edge.isWeighted()) {
             throw new IllegalArgumentException("Edge must not have weight");
+        }
+    }
+
+    private void validateEdgeVertexIds(int startVertexId, int endVertexId) {
+        validateVertexId(startVertexId);
+        validateVertexId(endVertexId);
+
+        if (startVertexId == endVertexId) {
+            throw new IllegalArgumentException("Edge start matches it's end");
         }
     }
 

@@ -1,7 +1,6 @@
 package learning.graph;
 
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public interface Graph {
     boolean addEdge(Edge edge);
@@ -9,6 +8,8 @@ public interface Graph {
     int addVertex(Vertex vertex);
 
     Vertex getVertexById(int id);
+
+    boolean areAdjacent(int startVertexId, int endVertexId);
 
     int size();
 
@@ -32,13 +33,13 @@ public interface Graph {
         return mst(0);
     }
 
-    interface Vertex {
-        String getName();
-    }
-
     enum DirectionType {DIRECTED, NON_DIRECTED, MIXED}
 
     enum WeightType {WEIGHTED, NON_WEIGHTED}
+
+    interface Vertex {
+        String getName();
+    }
 
     interface Edge {
         int getStartVertexId();
