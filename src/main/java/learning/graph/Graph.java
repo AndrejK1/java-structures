@@ -1,5 +1,6 @@
 package learning.graph;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public interface Graph {
@@ -13,15 +14,15 @@ public interface Graph {
 
     void clear();
 
-    void dfs(int startVertexId, Consumer<Vertex> action);
+    void dfs(int startVertexId, BiConsumer<Integer, Graph.Vertex> action);
 
-    default void dfs(Consumer<Vertex> action) {
+    default void dfs(BiConsumer<Integer, Graph.Vertex> action) {
         dfs(0, action);
     }
 
-    void bfs(int startVertexId, Consumer<Vertex> action);
+    void bfs(int startVertexId, BiConsumer<Integer, Vertex> action);
 
-    default void bfs(Consumer<Vertex> action) {
+    default void bfs(BiConsumer<Integer, Graph.Vertex> action) {
         bfs(0, action);
     }
 
@@ -35,12 +36,20 @@ public interface Graph {
         String getName();
     }
 
+    enum DirectionType {DIRECTED, NON_DIRECTED, MIXED}
+
+    enum WeightType {WEIGHTED, NON_WEIGHTED}
+
     interface Edge {
         int getStartVertexId();
 
         int getEndVertexId();
 
-        double getWeight();
+        Double getWeight();
+
+        default boolean isWeighted() {
+            return getWeight() != null;
+        }
 
         DirectionType getDirectionType();
 

@@ -11,7 +11,7 @@ public class GraphTest {
 
     @Test
     public void testSimpleGraph() {
-        innerTestGraph(new SimpleGraph());
+        innerTestGraph(new SimpleGraph(10, Graph.DirectionType.MIXED, Graph.WeightType.NON_WEIGHTED));
     }
 
     private void innerTestGraph(Graph graph) {
@@ -25,7 +25,7 @@ public class GraphTest {
 
         /*
             0
-         /.   .\
+         /.   \.
         1   -   2
         |.  .\  |.
         3   -   4
