@@ -3,10 +3,13 @@ package learning.graph;
 import additional.Pair;
 import additional.Todo;
 import learning.list.SimpleLinkedList;
+import learning.pyramid.DoublePriorityPyramid;
+import learning.queue.PriorityQueue;
 import learning.queue.Queue;
 import learning.stack.LinkedStack;
 import learning.stack.Stack;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,8 +17,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -25,6 +32,7 @@ public class SimpleGraph implements WeightedGraph {
     private final Graph.DirectionType graphDirectionType;
     private final Graph.WeightType graphWeightType;
 
+    private final Map<String, Integer> vertexIdsByName;
     private final List<Graph.Vertex> vertexes;
     private final AdjustableSquareMatrix<Double> adjacencyMatrix;
 
@@ -36,6 +44,7 @@ public class SimpleGraph implements WeightedGraph {
         this.graphDirectionType = directionType;
         this.graphWeightType = weightType;
         this.vertexes = new ArrayList<>(expectedSize);
+        this.vertexIdsByName = new HashMap<>(expectedSize);
         this.adjacencyMatrix = new AdjustableSquareMatrix<>(expectedSize);
     }
 
@@ -64,14 +73,25 @@ public class SimpleGraph implements WeightedGraph {
     @Override
     public int addVertex(Graph.Vertex vertex) {
         validateVertex(vertex);
+
         vertexes.add(vertex);
-        return vertexes.size() - 1;
+        int vertexIndex = vertexes.size() - 1;
+        vertexIdsByName.put(vertex.getName(), vertexIndex);
+
+        return vertexIndex;
     }
 
     @Override
     public Graph.Vertex getVertexById(int id) {
         validateVertexId(id);
         return vertexes.get(id);
+    }
+
+    @Override
+    public Vertex getVertexByName(String name) {
+        return Optional.ofNullable(vertexIdsByName.get(name))
+                .map(this::getVertexById)
+                .orElseThrow(() -> new IllegalArgumentException("No such vertex {" + name + "} found"));
     }
 
     @Override
@@ -88,6 +108,7 @@ public class SimpleGraph implements WeightedGraph {
     @Override
     public void clear() {
         vertexes.clear();
+        vertexIdsByName.clear();
         adjacencyMatrix.clear();
     }
 
@@ -112,7 +133,7 @@ public class SimpleGraph implements WeightedGraph {
         while (!vertexStack.isEmpty()) {
             Integer currentVertex = vertexStack.peek();
 
-            Integer adjustedUnvisited = findAdjustedUnvisited(currentVertex, visitedVertexes);
+            Integer adjustedUnvisited = findAnyAdjustedUnvisitedVertex(currentVertex, visitedVertexes);
 
             if (adjustedUnvisited.equals(INVALID_ID)) {
                 vertexStack.pop();
@@ -148,7 +169,7 @@ public class SimpleGraph implements WeightedGraph {
         while (!vertexQueue.isEmpty()) {
             Integer currentVertex = vertexQueue.pop();
 
-            while (!(vertexBufferId = findAdjustedUnvisited(currentVertex, visitedVertexes)).equals(INVALID_ID)) {
+            while (!(vertexBufferId = findAnyAdjustedUnvisitedVertex(currentVertex, visitedVertexes)).equals(INVALID_ID)) {
                 visitedVertexes.add(vertexBufferId);
                 vertexQueue.push(vertexBufferId);
                 action.accept(vertexBufferId, vertexes.get(vertexBufferId));
@@ -185,7 +206,94 @@ public class SimpleGraph implements WeightedGraph {
         throw new Todo();
     }
 
-    private Integer findAdjustedUnvisited(int id, Set<Integer> visitedVertexes) {
+    @Override
+    public FoundPath findShortestPath(int startVertex, int endVertex) {
+        return findShortestPath(findVertexNameById(startVertex), findVertexNameById(endVertex));
+    }
+
+    @Override
+    public FoundPath findShortestPath(String startVertex, String endVertex) {
+        Set<Integer> visitedVertexes = new HashSet<>();
+        Map<String, VertexPathData> vertexPathData = new HashMap<>();
+        PriorityQueue<Double, Vertex> vertexQueue = new DoublePriorityPyramid<>(false);
+
+        vertexQueue.push(getVertexByName(startVertex), 0D);
+        vertexPathData.put(startVertex, new VertexPathData(startVertex, null, 0));
+
+        while (!vertexQueue.isEmpty()) {
+            Vertex current = vertexQueue.pop();
+            int currentVertexId = findVertexIdByName(current.getName());
+
+            if (visitedVertexes.contains(currentVertexId)) {
+                continue;
+            }
+
+            if (current.getName().equals(endVertex)) {
+                return collectPath(vertexPathData, startVertex, endVertex);
+            }
+
+            for (Integer unvisitedVertexId : findAllAdjustedVertexes(currentVertexId, visitedVertexes)) {
+                Double weight = adjacencyMatrix.get(currentVertexId, unvisitedVertexId);
+
+                Vertex unvisitedVertex = getVertexById(unvisitedVertexId);
+
+                VertexPathData currentVertexData = vertexPathData.get(current.getName());
+                VertexPathData existingUnvisitedVertexData = vertexPathData.get(unvisitedVertex.getName());
+
+                double pathLengthToUnvisitedVertex = currentVertexData.getPathLength() + weight;
+
+                if (existingUnvisitedVertexData != null && existingUnvisitedVertexData.getPathLength() > pathLengthToUnvisitedVertex) {
+                    existingUnvisitedVertexData.setPathLength(pathLengthToUnvisitedVertex);
+                    existingUnvisitedVertexData.setPreviousVertexName(current.getName());
+
+                    vertexQueue.remove(unvisitedVertex);
+                } else if (existingUnvisitedVertexData == null) {
+                    vertexPathData.put(unvisitedVertex.getName(),
+                            new VertexPathData(unvisitedVertex.getName(), current.getName(), pathLengthToUnvisitedVertex));
+                }
+
+                vertexQueue.push(unvisitedVertex, pathLengthToUnvisitedVertex);
+            }
+
+            visitedVertexes.add(currentVertexId);
+        }
+
+        return new SimpleFoundPath(false, Collections.emptyList(), INVALID_ID);
+    }
+
+    private FoundPath collectPath(Map<String, VertexPathData> vertexPathData, String startVertexName, String endVertexName) {
+        String currentVertexName = endVertexName;
+        List<Vertex> pathVertexes = new ArrayList<>();
+
+        while (!currentVertexName.equals(startVertexName)) {
+            VertexPathData currentVertexData = vertexPathData.get(currentVertexName);
+
+            if (currentVertexData == null) {
+                throw new IllegalStateException("Can't trace graph path");
+            }
+
+            pathVertexes.add(0, getVertexByName(currentVertexName));
+            currentVertexName = currentVertexData.getPreviousVertexName();
+        }
+
+        return new SimpleFoundPath(true, pathVertexes, vertexPathData.get(endVertexName).getPathLength());
+    }
+
+    private List<Integer> findAllAdjustedVertexes(int id, Set<Integer> visitedVertexes) {
+        List<Integer> adjustedVertexes = new ArrayList<>();
+
+        for (int i = 0; i < adjacencyMatrix.width(); i++) {
+            Double relationWeight = adjacencyMatrix.get(id, i);
+
+            if (relationWeight != null && !visitedVertexes.contains(i)) {
+                adjustedVertexes.add(i);
+            }
+        }
+
+        return adjustedVertexes;
+    }
+
+    private int findAnyAdjustedUnvisitedVertex(int id, Set<Integer> visitedVertexes) {
         for (int i = 0; i < adjacencyMatrix.width(); i++) {
             Double relationWeight = adjacencyMatrix.get(id, i);
 
@@ -197,7 +305,19 @@ public class SimpleGraph implements WeightedGraph {
         return INVALID_ID;
     }
 
-    private void requireNotNull(Object o, String title) {
+    private int findVertexIdByName(String name) {
+        return Optional.ofNullable(vertexIdsByName.get(name))
+                .orElseThrow(() -> new IllegalArgumentException("No vertex with name {" + name + "} found"));
+    }
+
+    private String findVertexNameById(int id) {
+        validateVertexId(id);
+        return vertexes.get(id).getName();
+    }
+
+    // validation
+
+    private static void requireNotNull(Object o, String title) {
         if (o == null) {
             throw new IllegalArgumentException(title + " is null");
         }
@@ -208,6 +328,10 @@ public class SimpleGraph implements WeightedGraph {
 
         if (vertex.getName() == null) {
             throw new IllegalArgumentException("Vertex name is null");
+        }
+
+        if (vertexIdsByName.containsKey(vertex.getName())) {
+            throw new IllegalArgumentException("Vertex name is already exists");
         }
     }
 
@@ -279,5 +403,20 @@ public class SimpleGraph implements WeightedGraph {
         public static SimpleEdge weightedDirected(int startVertexId, int endVertexId, double weight) {
             return new SimpleEdge(startVertexId, endVertexId, weight, DirectionType.DIRECTED);
         }
+    }
+
+    @Data
+    public static class SimpleFoundPath implements FoundPath {
+        private final boolean pathPossible;
+        private final List<Vertex> pathVertexes;
+        private final double pathLength;
+    }
+
+    @Data
+    @AllArgsConstructor
+    private static final class VertexPathData {
+        private final String name;
+        private String previousVertexName;
+        private double pathLength;
     }
 }

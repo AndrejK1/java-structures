@@ -1,7 +1,8 @@
 package learning.queue;
 
-public interface PriorityQueue<T> extends Queue<T> {
+public interface PriorityQueue<K extends Comparable<K>, T> extends Queue<T> {
 
-    void push(T element, int priority);
+    void push(T element, K priority);
 
+    boolean remove(T element);
 }

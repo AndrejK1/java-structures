@@ -17,7 +17,7 @@ public class PyramidTest {
     public void testIntegerPriorityPyramid() {
         int defaultPriority = 100;
 
-        PriorityQueue<Integer> queue = new IntegerPriorityPyramid<>(100, defaultPriority);
+        PriorityQueue<Integer, Integer> queue = new IntegerPriorityPyramid<>(100, defaultPriority, true);
 
         Assert.assertTrue(queue.isEmpty());
 
@@ -37,6 +37,33 @@ public class PyramidTest {
 
         for (int i = 0; i < elements.size() - 2; i++) {
             Assert.assertTrue(elements.get(i) >= elements.get(i + 1));
+        }
+    }
+
+    @Test
+    public void testInverseDoublePriorityPyramid() {
+        int defaultPriority = 100;
+
+        PriorityQueue<Double, Integer> queue = new DoublePriorityPyramid<>(100, defaultPriority, false);
+
+        Assert.assertTrue(queue.isEmpty());
+
+        Stream.generate(() -> r.nextDouble(defaultPriority * 2))
+                .limit(100)
+                .forEach(i -> queue.push(i.intValue(), i));
+
+        queue.push(defaultPriority);
+
+        List<Integer> elements = new ArrayList<>();
+
+        while (!queue.isEmpty()) {
+            elements.add(queue.pop());
+        }
+
+        Assert.assertEquals(101, elements.size());
+
+        for (int i = 0; i < elements.size() - 2; i++) {
+            Assert.assertTrue(elements.get(i) <= elements.get(i + 1));
         }
     }
 

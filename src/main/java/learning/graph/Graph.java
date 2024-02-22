@@ -9,6 +9,8 @@ public interface Graph {
 
     Vertex getVertexById(int id);
 
+    Vertex getVertexByName(String name);
+
     boolean areAdjacent(int startVertexId, int endVertexId);
 
     int size();
