@@ -1,28 +1,28 @@
 package learning.graph;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 @Slf4j
-public class GraphTest {
+class GraphTest {
 
     @Test
-    public void testSimpleGraph() {
+    void testSimpleGraph() {
         innerTestGraph(new SimpleGraph(10, Graph.DirectionType.MIXED, Graph.WeightType.NON_WEIGHTED));
     }
 
     private void innerTestGraph(Graph graph) {
-        Assert.assertEquals(0, graph.size());
+        Assertions.assertEquals(0, graph.size());
 
         Stream.of("0", "1", "2", "3", "4", "5", "6")
                 .map(SimpleGraph.SimpleVertex::new)
                 .forEach(graph::addVertex);
 
-        Assert.assertEquals(7, graph.size());
+        Assertions.assertEquals(7, graph.size());
 
         /*
             0
@@ -39,17 +39,17 @@ public class GraphTest {
         graph.addEdge(SimpleGraph.SimpleEdge.nonDirected(3, 4));
         graph.addEdge(SimpleGraph.SimpleEdge.directed(2, 4));
 
-        Assert.assertTrue(graph.areAdjacent(0, 1));
-        Assert.assertFalse(graph.areAdjacent(0, 2));
-        Assert.assertFalse(graph.areAdjacent(0, 3));
-        Assert.assertFalse(graph.areAdjacent(1, 0));
-        Assert.assertFalse(graph.areAdjacent(0, 4));
-        Assert.assertTrue(graph.areAdjacent(1, 2));
-        Assert.assertFalse(graph.areAdjacent(1, 5));
-        Assert.assertTrue(graph.areAdjacent(2, 4));
-        Assert.assertFalse(graph.areAdjacent(4, 2));
-        Assert.assertTrue(graph.areAdjacent(3, 4));
-        Assert.assertTrue(graph.areAdjacent(4, 3));
+        Assertions.assertTrue(graph.areAdjacent(0, 1));
+        Assertions.assertFalse(graph.areAdjacent(0, 2));
+        Assertions.assertFalse(graph.areAdjacent(0, 3));
+        Assertions.assertFalse(graph.areAdjacent(1, 0));
+        Assertions.assertFalse(graph.areAdjacent(0, 4));
+        Assertions.assertTrue(graph.areAdjacent(1, 2));
+        Assertions.assertFalse(graph.areAdjacent(1, 5));
+        Assertions.assertTrue(graph.areAdjacent(2, 4));
+        Assertions.assertFalse(graph.areAdjacent(4, 2));
+        Assertions.assertTrue(graph.areAdjacent(3, 4));
+        Assertions.assertTrue(graph.areAdjacent(4, 3));
         /*
           0
          /
@@ -58,36 +58,36 @@ public class GraphTest {
         3 - 4
          */
         Graph mst = graph.mst();
-        Assert.assertEquals(5, mst.size());
+        Assertions.assertEquals(5, mst.size());
 
-        Assert.assertTrue(mst.areAdjacent(0, 1));
-        Assert.assertFalse(mst.areAdjacent(0, 2));
-        Assert.assertFalse(mst.areAdjacent(0, 3));
-        Assert.assertFalse(mst.areAdjacent(0, 4));
+        Assertions.assertTrue(mst.areAdjacent(0, 1));
+        Assertions.assertFalse(mst.areAdjacent(0, 2));
+        Assertions.assertFalse(mst.areAdjacent(0, 3));
+        Assertions.assertFalse(mst.areAdjacent(0, 4));
 
-        Assert.assertTrue(mst.areAdjacent(1, 0));
-        Assert.assertTrue(mst.areAdjacent(1, 2));
-        Assert.assertFalse(mst.areAdjacent(1, 3));
-        Assert.assertFalse(mst.areAdjacent(1, 4));
+        Assertions.assertTrue(mst.areAdjacent(1, 0));
+        Assertions.assertTrue(mst.areAdjacent(1, 2));
+        Assertions.assertFalse(mst.areAdjacent(1, 3));
+        Assertions.assertFalse(mst.areAdjacent(1, 4));
 
-        Assert.assertFalse(mst.areAdjacent(2, 0));
-        Assert.assertTrue(mst.areAdjacent(2, 1));
-        Assert.assertFalse(mst.areAdjacent(2, 3));
-        Assert.assertTrue(mst.areAdjacent(2, 4));
+        Assertions.assertFalse(mst.areAdjacent(2, 0));
+        Assertions.assertTrue(mst.areAdjacent(2, 1));
+        Assertions.assertFalse(mst.areAdjacent(2, 3));
+        Assertions.assertTrue(mst.areAdjacent(2, 4));
 
-        Assert.assertFalse(mst.areAdjacent(3, 0));
-        Assert.assertFalse(mst.areAdjacent(3, 1));
-        Assert.assertFalse(mst.areAdjacent(3, 2));
-        Assert.assertTrue(mst.areAdjacent(3, 4));
+        Assertions.assertFalse(mst.areAdjacent(3, 0));
+        Assertions.assertFalse(mst.areAdjacent(3, 1));
+        Assertions.assertFalse(mst.areAdjacent(3, 2));
+        Assertions.assertTrue(mst.areAdjacent(3, 4));
 
-        Assert.assertFalse(mst.areAdjacent(4, 0));
-        Assert.assertFalse(mst.areAdjacent(4, 1));
-        Assert.assertTrue(mst.areAdjacent(4, 2));
-        Assert.assertTrue(mst.areAdjacent(4, 3));
+        Assertions.assertFalse(mst.areAdjacent(4, 0));
+        Assertions.assertFalse(mst.areAdjacent(4, 1));
+        Assertions.assertTrue(mst.areAdjacent(4, 2));
+        Assertions.assertTrue(mst.areAdjacent(4, 3));
     }
 
     @Test
-    public void findShortestPathTest() {
+    void findShortestPathTest() {
         SimpleGraph simpleGraph = new SimpleGraph(13, Graph.DirectionType.MIXED, Graph.WeightType.WEIGHTED);
 
         int s = simpleGraph.addVertex(new SimpleGraph.SimpleVertex("S"));
@@ -127,20 +127,20 @@ public class GraphTest {
 
         WeightedGraph.FoundPath shortestPath = simpleGraph.findShortestPath(s, e);
 
-        Assert.assertTrue(shortestPath.isPathPossible());
-        Assert.assertEquals(0, Double.compare(18D, shortestPath.getPathLength()));
+        Assertions.assertTrue(shortestPath.isPathPossible());
+        Assertions.assertEquals(0, Double.compare(18D, shortestPath.getPathLength()));
 
         List<String> correctVertexOrder = List.of("B", "D", "F", "H", "G", "E");
 
-        Assert.assertEquals(correctVertexOrder.size(), shortestPath.getPathVertexes().size());
+        Assertions.assertEquals(correctVertexOrder.size(), shortestPath.getPathVertexes().size());
 
         for (int index = 0; index < correctVertexOrder.size(); index++) {
-            Assert.assertEquals(correctVertexOrder.get(index), shortestPath.getPathVertexes().get(index).getName());
+            Assertions.assertEquals(correctVertexOrder.get(index), shortestPath.getPathVertexes().get(index).getName());
         }
     }
 
     @Test
-    public void findNoPathTest() {
+    void findNoPathTest() {
         SimpleGraph simpleGraph = new SimpleGraph(13, Graph.DirectionType.MIXED, Graph.WeightType.WEIGHTED);
 
         int s = simpleGraph.addVertex(new SimpleGraph.SimpleVertex("S"));
@@ -151,6 +151,6 @@ public class GraphTest {
 
         WeightedGraph.FoundPath shortestPath = simpleGraph.findShortestPath(s, b);
 
-        Assert.assertFalse(shortestPath.isPathPossible());
+        Assertions.assertFalse(shortestPath.isPathPossible());
     }
 }

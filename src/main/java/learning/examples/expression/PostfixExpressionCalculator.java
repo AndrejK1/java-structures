@@ -1,68 +1,41 @@
 package learning.examples.expression;
 
-import static learning.examples.expression.CalculatorSupportedOperatorType.getByNotation;
-import static learning.examples.expression.ExpressionUnit.*;
 import learning.stack.LinkedStack;
 import learning.stack.Stack;
 
 import java.math.BigDecimal;
-import java.util.regex.Pattern;
+
+import static learning.examples.expression.CalculatorSupportedOperatorType.getByNotation;
 
 class PostfixExpressionCalculator {
-    private static final Pattern VALIDATION_PATTERN = Pattern.compile("^[0-9-+*.!()^/%\\[\\]\\s]+$");
-    private final Stack<BigDecimal> operands;
-
-    public PostfixExpressionCalculator() {
-        operands = new LinkedStack<>();
-    }
+    private final Stack<BigDecimal> operands = new LinkedStack<>();
+    private StringBuilder currentOperand = new StringBuilder();
+    private StringBuilder currentOperator = new StringBuilder();
+    private ExpressionUnit currentUnit = ExpressionUnit.NONE;
 
     public BigDecimal calculateExpression(String postfixExpression) {
         clear();
 
-        if (!VALIDATION_PATTERN.matcher(postfixExpression).matches()) {
+        if (postfixExpression == null) {
             throw new IllegalArgumentException("Invalid input string " + postfixExpression + " for math expression parser");
         }
-
-        StringBuilder currentOperand = new StringBuilder();
-        ExpressionUnit currentUnit = NONE;
 
         for (int i = 0; i < postfixExpression.length(); i++) {
             char currentChar = postfixExpression.charAt(i);
 
-            if (currentChar == '[') {
-                currentUnit = OPERAND;
-                continue;
-            }
-
-            // handle numbers
-            if (currentUnit == OPERAND && canBeNumberPart(currentChar)) {
-                currentOperand.append(currentChar);
-                continue;
-            }
-
-            if (currentChar == ']') {
-                String operand = currentOperand.toString();
-
-                if (!operand.isEmpty()) {
-                    operands.push(new BigDecimal(operand));
-                    currentOperand = new StringBuilder();
+            switch (currentChar) {
+                case '[' -> startReadingOperand();
+                case ']' -> endReadingOperand();
+                case '{' -> startReadingOperator();
+                case '}' -> endReadingOperator();
+                default -> {
+                    if (currentUnit == ExpressionUnit.OPERAND) {
+                        currentOperand.append(currentChar);
+                    } else if (currentUnit == ExpressionUnit.OPERATOR) {
+                        currentOperator.append(currentChar);
+                    }
                 }
-
-                currentUnit = NONE;
-                continue;
             }
-
-            // handle operators
-            CalculatorSupportedOperatorType operator = getByNotation(currentChar);
-            currentUnit = OPERATOR;
-
-            BigDecimal[] currentOperands = new BigDecimal[operator.getOperandCount()];
-
-            for (int j = 0; j < operator.getOperandCount(); j++) {
-                currentOperands[currentOperands.length - j - 1] = operands.pop();
-            }
-
-            operands.push(operator.calculate(currentOperands));
         }
 
         BigDecimal finalResult = operands.pop();
@@ -74,11 +47,49 @@ class PostfixExpressionCalculator {
         return finalResult;
     }
 
-    private boolean canBeNumberPart(char character) {
-        return Character.isDigit(character) || character == '.' || character == '-';
+    private void startReadingOperand() {
+        currentUnit = ExpressionUnit.OPERAND;
+    }
+
+    private void endReadingOperand() {
+        String operand = currentOperand.toString();
+
+        if (!operand.isEmpty()) {
+            operands.push(new BigDecimal(operand));
+            currentOperand = new StringBuilder();
+        }
+
+        currentUnit = ExpressionUnit.NONE;
+    }
+
+    private void startReadingOperator() {
+        currentUnit = ExpressionUnit.OPERATOR;
+    }
+
+    private void endReadingOperator() {
+        // handle operator
+        CalculatorSupportedOperatorType operator = getByNotation(currentOperator.toString());
+        BigDecimal[] currentOperands = new BigDecimal[operator.getOperandCount()];
+
+        for (int j = 0; j < operator.getOperandCount(); j++) {
+            currentOperands[currentOperands.length - j - 1] = operands.pop();
+        }
+
+        operands.push(operator.calculate(currentOperands));
+        currentOperator = new StringBuilder();
+        currentUnit = ExpressionUnit.NONE;
     }
 
     public void clear() {
         operands.clear();
+        currentOperand = new StringBuilder();
+        currentOperator = new StringBuilder();
+        currentUnit = ExpressionUnit.NONE;
+    }
+
+    private enum ExpressionUnit {
+        OPERATOR,
+        OPERAND,
+        NONE
     }
 }

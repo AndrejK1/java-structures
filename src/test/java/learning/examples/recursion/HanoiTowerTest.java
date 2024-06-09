@@ -2,13 +2,13 @@ package learning.examples.recursion;
 
 import learning.examples.recursion.hanoi.HanoiCallbackSummary;
 import learning.examples.recursion.hanoi.HanoiTower;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class HanoiTowerTest {
+class HanoiTowerTest {
 
     @Test
-    public void test() {
+    void test() {
         testHanoi(1);
         System.out.println();
         testHanoi(2);
@@ -23,13 +23,13 @@ public class HanoiTowerTest {
 
         HanoiCallbackSummary summary = hanoiTower.solve(s -> System.out.println(s.currentTurn()));
 
-        Assert.assertEquals(calcTurns(size), summary.getTurns());
-        Assert.assertEquals(calcTurns(size), summary.getEstimatedTurns());
-        Assert.assertEquals(size, summary.getHeight());
-        Assert.assertEquals(0, summary.getA().size());
-        Assert.assertEquals(0, summary.getB().size());
-        Assert.assertEquals(size, summary.getC().size());
-        Assert.assertTrue(summary.isSolved());
+        Assertions.assertEquals(calcTurns(size), summary.getTurns());
+        Assertions.assertEquals(calcTurns(size), summary.getEstimatedTurns());
+        Assertions.assertEquals(size, summary.getHeight());
+        Assertions.assertEquals(0, summary.getA().size());
+        Assertions.assertEquals(0, summary.getB().size());
+        Assertions.assertEquals(size, summary.getC().size());
+        Assertions.assertTrue(summary.isSolved());
     }
 
     private int calcTurns(int size) {

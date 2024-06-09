@@ -1,80 +1,80 @@
 package learning.list;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
-public class ListTest {
+class ListTest {
 
     @Test
-    public void testLinkedList() {
+    void testLinkedList() {
         innerListTest(new SimpleLinkedList<>());
     }
 
     @Test
-    public void testArrayListList() {
+    void testArrayListList() {
         innerListTest(new SimpleArrayList<>());
     }
 
     private void innerListTest(MutableList<Integer> list) {
-        Assert.assertEquals(0, list.size());
-        Assert.assertFalse(list.contains(0));
+        Assertions.assertEquals(0, list.size());
+        Assertions.assertFalse(list.contains(0));
 
         list.add(1);
 
-        Assert.assertEquals(1, list.size());
-        Assert.assertFalse(list.contains(0));
-        Assert.assertTrue(list.contains(1));
-        Assert.assertEquals(0, list.findPos(1));
+        Assertions.assertEquals(1, list.size());
+        Assertions.assertFalse(list.contains(0));
+        Assertions.assertTrue(list.contains(1));
+        Assertions.assertEquals(0, list.findPos(1));
 
         list.remove(0);
 
-        Assert.assertEquals(0, list.size());
-        Assert.assertFalse(list.contains(1));
-        Assert.assertEquals(-1, list.findPos(1));
+        Assertions.assertEquals(0, list.size());
+        Assertions.assertFalse(list.contains(1));
+        Assertions.assertEquals(-1, list.findPos(1));
 
         list.add(2);
         list.add(3);
         list.add(10, 1);
 
-        Assert.assertEquals(3, list.size());
-        Assert.assertTrue(list.contains(2));
-        Assert.assertEquals(0, list.findPos(2));
-        Assert.assertEquals(1, list.findPos(10));
-        Assert.assertEquals(2, list.findPos(3));
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertTrue(list.contains(2));
+        Assertions.assertEquals(0, list.findPos(2));
+        Assertions.assertEquals(1, list.findPos(10));
+        Assertions.assertEquals(2, list.findPos(3));
 
         list.remove(1);
 
-        Assert.assertEquals(2, list.size());
-        Assert.assertTrue(list.contains(2));
-        Assert.assertFalse(list.contains(10));
-        Assert.assertEquals(0, list.findPos(2));
-        Assert.assertEquals(1, list.findPos(3));
+        Assertions.assertEquals(2, list.size());
+        Assertions.assertTrue(list.contains(2));
+        Assertions.assertFalse(list.contains(10));
+        Assertions.assertEquals(0, list.findPos(2));
+        Assertions.assertEquals(1, list.findPos(3));
 
-        Assert.assertTrue(list.remove(new Integer(2)));
-        Assert.assertFalse(list.remove(new Integer(2)));
+        Assertions.assertTrue(list.remove(new Integer(2)));
+        Assertions.assertFalse(list.remove(new Integer(2)));
 
-        Assert.assertEquals(1, list.size());
-        Assert.assertEquals(0, list.findPos(3));
+        Assertions.assertEquals(1, list.size());
+        Assertions.assertEquals(0, list.findPos(3));
 
         list.clear();
 
-        Assert.assertEquals(0, list.size());
-        Assert.assertFalse(list.contains(3));
+        Assertions.assertEquals(0, list.size());
+        Assertions.assertFalse(list.contains(3));
 
         java.util.List<Integer> largeList = IntStream.rangeClosed(1, 1000).boxed().collect(Collectors.toList());
         largeList.forEach(list::add);
-        Assert.assertEquals(largeList.size(), list.size());
-        largeList.forEach(v -> Assert.assertTrue(list.contains(v)));
+        Assertions.assertEquals(largeList.size(), list.size());
+        largeList.forEach(v -> Assertions.assertTrue(list.contains(v)));
 
         list.set(34, 3);
 
-        Assert.assertEquals(largeList.size(), list.size());
-        Assert.assertEquals(34, list.get(3).intValue());
-        Assert.assertTrue(list.contains(34));
+        Assertions.assertEquals(largeList.size(), list.size());
+        Assertions.assertEquals(34, list.get(3).intValue());
+        Assertions.assertTrue(list.contains(34));
     }
 }

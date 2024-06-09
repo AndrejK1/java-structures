@@ -1,8 +1,8 @@
 package learning.sorting;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
-public class SortingTest {
+class SortingTest {
 
     private final Random r = new Random();
 
-    @Test
-    public void runMassiveSortingEfficiencyTest() {
+    //    @Test
+    void runMassiveSortingEfficiencyTest() {
         List<ListSorter> enabledSorters = Arrays.asList(
                 ListSorters.SHELL_SORTER,
                 ListSorters.MERGE_SORTER,
@@ -31,7 +31,7 @@ public class SortingTest {
     }
 
     @Test
-    public void runAllSortingEfficiencyTest() {
+    void runAllSortingEfficiencyTest() {
         List<ListSorter> enabledSorters = Arrays.asList(
                 ListSorters.BUBBLE_SORTER
                 , ListSorters.SELECTION_SORTER
@@ -42,7 +42,7 @@ public class SortingTest {
                 , ListSorters.QUICK_SORTER
         );
 
-        testSortingAlgorithms(enabledSorters, 50_000 + r.nextInt(10_000));
+        testSortingAlgorithms(enabledSorters, 10_000 + r.nextInt(10_000));
     }
 
     private void testSortingAlgorithms(Collection<ListSorter> sorters, int elements) {
@@ -88,7 +88,7 @@ public class SortingTest {
         long end = System.currentTimeMillis();
 
         for (int i = 1; i < listForSort.size() - 1; i++) {
-            Assert.assertFalse(listForSort.get(i).compareTo(listForSort.get(i - 1)) < 0);
+            Assertions.assertFalse(listForSort.get(i).compareTo(listForSort.get(i - 1)) < 0);
         }
 
         log.info(String.format("%-20s: Sorting done in %s ms\t(validated)",

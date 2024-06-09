@@ -1,17 +1,17 @@
 package learning.examples.zipper;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
 @Slf4j
-public class HuffmanZipperTest {
+class HuffmanZipperTest {
     private final HuffmanZipper huffmanZipper = new HuffmanZipper();
 
     @Test
-    public void testZipper() {
+    void testZipper() {
         Arrays.asList("", "e", "eeee", "test", "Some sentence hare", "Different chars:!@36-+=\\")
                 .forEach(this::innerTest);
     }
@@ -20,6 +20,6 @@ public class HuffmanZipperTest {
         log.info("Processing `{}`", actualString);
         ZipResult zipResult = huffmanZipper.zipString(actualString);
         String unzipString = huffmanZipper.unzipString(zipResult.getZip(), zipResult.getTree());
-        Assert.assertEquals(actualString, unzipString);
+        Assertions.assertEquals(actualString, unzipString);
     }
 }

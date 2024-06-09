@@ -2,24 +2,24 @@ package learning.pyramid;
 
 import learning.queue.PriorityQueue;
 import learning.queue.Queue;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
-public class PyramidTest {
+class PyramidTest {
     private final Random r = new Random();
 
     @Test
-    public void testIntegerPriorityPyramid() {
+    void testIntegerPriorityPyramid() {
         int defaultPriority = 100;
 
         PriorityQueue<Integer, Integer> queue = new IntegerPriorityPyramid<>(100, defaultPriority, true);
 
-        Assert.assertTrue(queue.isEmpty());
+        Assertions.assertTrue(queue.isEmpty());
 
         Stream.generate(() -> r.nextInt(defaultPriority * 2))
                 .limit(100)
@@ -33,20 +33,20 @@ public class PyramidTest {
             elements.add(queue.pop());
         }
 
-        Assert.assertEquals(101, elements.size());
+        Assertions.assertEquals(101, elements.size());
 
         for (int i = 0; i < elements.size() - 2; i++) {
-            Assert.assertTrue(elements.get(i) >= elements.get(i + 1));
+            Assertions.assertTrue(elements.get(i) >= elements.get(i + 1));
         }
     }
 
     @Test
-    public void testInverseDoublePriorityPyramid() {
+    void testInverseDoublePriorityPyramid() {
         int defaultPriority = 100;
 
         PriorityQueue<Double, Integer> queue = new DoublePriorityPyramid<>(100, defaultPriority, false);
 
-        Assert.assertTrue(queue.isEmpty());
+        Assertions.assertTrue(queue.isEmpty());
 
         Stream.generate(() -> r.nextDouble(defaultPriority * 2))
                 .limit(100)
@@ -60,20 +60,20 @@ public class PyramidTest {
             elements.add(queue.pop());
         }
 
-        Assert.assertEquals(101, elements.size());
+        Assertions.assertEquals(101, elements.size());
 
         for (int i = 0; i < elements.size() - 2; i++) {
-            Assert.assertTrue(elements.get(i) <= elements.get(i + 1));
+            Assertions.assertTrue(elements.get(i) <= elements.get(i + 1));
         }
     }
 
     @Test
-    public void testPyramid() {
+    void testPyramid() {
         int defaultPriority = 100;
 
         Queue<Integer> queue = new Pyramid<>(100);
 
-        Assert.assertTrue(queue.isEmpty());
+        Assertions.assertTrue(queue.isEmpty());
 
         Stream.generate(() -> r.nextInt(defaultPriority * 2))
                 .limit(100)
@@ -87,10 +87,10 @@ public class PyramidTest {
             elements.add(queue.pop());
         }
 
-        Assert.assertEquals(101, elements.size());
+        Assertions.assertEquals(101, elements.size());
 
         for (int i = 0; i < elements.size() - 2; i++) {
-            Assert.assertTrue(elements.get(i) >= elements.get(i + 1));
+            Assertions.assertTrue(elements.get(i) >= elements.get(i + 1));
         }
     }
 }

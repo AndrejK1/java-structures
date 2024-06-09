@@ -7,41 +7,66 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
+@Getter
 @AllArgsConstructor
 enum CalculatorSupportedOperatorType {
-    SUBTRACTION("-", 10, 2, BigDecimal::subtract),
-    ADD("+", 10, 2, BigDecimal::add),
-    DIVISION("/", 20, 2, BigDecimal::divide),
-    MULTIPLICATION("*", 20, 2, BigDecimal::multiply),
-    MOD("%", 20, 2, BigDecimal::remainder),
-    POWER("^", 30, 2, CalculatorUtils::pow),
-    FACTORIAL("!", 40, 1, CalculatorUtils::factorial),
+    // constants
+    PI("PI", false, 100, 0, x -> BigDecimal.valueOf(Math.PI)),
+    E("E", false, 100, 0, x -> BigDecimal.valueOf(Math.E)),
+    TAU("TAU", false, 100, 0, x -> BigDecimal.valueOf(Math.TAU)),
+
+    // basic
+    SUBTRACTION("-", false, 10, 2, BigDecimal::subtract),
+    ADD("+", false, 10, 2, BigDecimal::add),
+    DIVISION("/", false, 20, 2, BigDecimal::divide),
+    MULTIPLICATION("*", false, 20, 2, BigDecimal::multiply),
+    MOD("%", false, 20, 2, BigDecimal::remainder),
+    POWER("^", false, 30, 2, CalculatorUtils::pow),
+    FACTORIAL("!", false, 40, 1, CalculatorUtils::factorial),
+
+    // functions
+    SIN("sin", true, 100, 1, CalculatorUtils::sin),
+    COS("cos", true, 100, 1, CalculatorUtils::cos),
+    TAN("tan", true, 100, 1, CalculatorUtils::tan),
+    CTAN("ctan", true, 100, 1, CalculatorUtils::ctan),
+    LN("ln", true, 100, 1, CalculatorUtils::ln),
+    LOG("lg", true, 100, 1, CalculatorUtils::lg),
+    ABS("abs", true, 100, 1, CalculatorUtils::abs),
     ;
 
-    @Getter
     private final String notation;
-
-    @Getter
+    private final boolean isFunction;
     private final int priority;
-
-    @Getter
     private final int operandCount;
-    private final BinaryOperator<BigDecimal> function;
+    private final Function<BigDecimal[], BigDecimal> function;
+
+    CalculatorSupportedOperatorType(String notation, boolean isFunction, int priority, int operandCount, BinaryOperator<BigDecimal> function) {
+        this(notation, isFunction, priority, operandCount, arguments -> function.apply(arguments[0], arguments[1]));
+    }
+
+    CalculatorSupportedOperatorType(String notation, boolean isFunction, int priority, Integer operandCount, UnaryOperator<BigDecimal> function) {
+        this(notation, isFunction, priority, operandCount, (Function<BigDecimal[], BigDecimal>) arguments -> function.apply(arguments[0]));
+    }
 
     private static final Map<String, CalculatorSupportedOperatorType> OPERATORS_BY_NOTATION = new HashMap<>();
 
-    public BigDecimal calculate(BigDecimal... operands) {
+    public BigDecimal calculate(BigDecimal[] operands) {
         if (operands == null || operands.length != operandCount) {
             throw new IllegalArgumentException("Incorrect arguments count");
         }
 
-        return function.apply(operands[0], operandCount > 1 ? operands[1] : null);
+        return function.apply(operands);
     }
 
-    public static CalculatorSupportedOperatorType getByNotation(char notation) {
-        return getByNotation(String.valueOf(notation));
+    public static boolean isNonFunctionByNotationExists(String notation) {
+        return Optional.ofNullable(OPERATORS_BY_NOTATION.get(notation))
+                .filter(o -> !o.isFunction)
+                .isPresent();
     }
 
     public static CalculatorSupportedOperatorType getByNotation(String notation) {
@@ -55,6 +80,6 @@ enum CalculatorSupportedOperatorType {
     }
 
     static {
-        Arrays.stream(values()).forEach(o -> OPERATORS_BY_NOTATION.put(o.getNotation(), o));
+        Arrays.stream(values()).forEach(o -> OPERATORS_BY_NOTATION.put(o.notation, o));
     }
 }

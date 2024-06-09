@@ -3,17 +3,17 @@ package learning.examples.recursion;
 import learning.examples.recursion.bag.Bag;
 import learning.examples.recursion.bag.BagResults;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 @Slf4j
-public class BagTest {
+class BagTest {
 
     @Test
-    public void testBag() {
+    void testBag() {
         innerBagTest(true, 10, 2, 3, 4, 5, 1);
         innerBagTest(false, 13, 15, 6);
         innerBagTest(false, 1, 3, 4, 5);
@@ -30,11 +30,11 @@ public class BagTest {
 
         log.info(bagResults.toString());
 
-        Assert.assertEquals(canBeSolved, bagResults.isSolved());
-        Assert.assertEquals(canBeSolved, bagResults.getWeight() == size);
+        Assertions.assertEquals(canBeSolved, bagResults.isSolved());
+        Assertions.assertEquals(canBeSolved, bagResults.getWeight() == size);
 
         if (!canBeSolved) {
-            Assert.assertTrue(bagResults.getThings().containsAll(thingsToFit));
+            Assertions.assertTrue(bagResults.getThings().containsAll(thingsToFit));
         }
     }
 }

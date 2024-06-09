@@ -1,25 +1,24 @@
 package learning.examples.expression;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
 @Slf4j
-public class CalculatorTest {
+class CalculatorTest {
     private final Calculator calculator = new Calculator();
-    private final PostfixExpressionCalculator postfixExpressionCalculator = new PostfixExpressionCalculator();
     private final InfixExpressionParser infixExpressionParser = new InfixExpressionParser();
 
     @Test
-    public void testPostfixCalculator() {
-        Assert.assertEquals("[-1][-2]*[3]-[-5][-3][5]-*+[5][-1]^-",
+    void testPostfixCalculator() {
+        Assertions.assertEquals("[-1][-2]{*}[3]{-}[-5][-3][5]{-}{*}{+}[5][-1]{^}{-}",
                 infixExpressionParser.parseExpression("-1 * -2 - 3 + -5 * (-3 - 5) - 5 ^ -1"));
     }
 
     @Test
-    public void testSimpleIntegerOperations() {
+    void testSimpleIntegerOperations() {
         assertEquals(BigDecimal.valueOf(3), calculator.calculateExpression("1 + 2"));
         assertEquals(BigDecimal.valueOf(1231), calculator.calculateExpression("1001 + 230"));
 
@@ -40,7 +39,7 @@ public class CalculatorTest {
     }
 
     @Test
-    public void testSimpleFloatOperations() {
+    void testSimpleFloatOperations() {
         assertEquals(BigDecimal.valueOf(3.5), calculator.calculateExpression("1.4 + 2.1"));
         assertEquals(BigDecimal.valueOf(1232), calculator.calculateExpression("1001.5 + 230.5"));
 
@@ -60,7 +59,7 @@ public class CalculatorTest {
     }
 
     @Test
-    public void testSimpleNegativeIntegerOperations() {
+    void testSimpleNegativeIntegerOperations() {
         assertEquals(BigDecimal.valueOf(-1), calculator.calculateExpression("1 + -2"));
         assertEquals(BigDecimal.valueOf(-1231), calculator.calculateExpression("-1001 + -230"));
 
@@ -82,9 +81,11 @@ public class CalculatorTest {
     }
 
     @Test
-    public void testComplexExpressions() {
+    void testComplexExpressions() {
+        assertEquals(BigDecimal.valueOf(-6), calculator.calculateExpression("-1 * 3!"));
         assertEquals(BigDecimal.valueOf(38.8), calculator.calculateExpression("-1 * -2 - 3 + -5 * (-3 - 5) - 5 ^ -1"));
         assertEquals(BigDecimal.valueOf(17), calculator.calculateExpression("(1.5 / (1+2) - 4 * 4 ^ 2 + 100 % 60) / 2 % 3.25 + 22 - 9 ^ 0.5"));
+        assertEquals(BigDecimal.valueOf(2), calculator.calculateExpression("32 / (1 * 2 + 22 % 4) ^ 2"));
     }
 
     private void assertEquals(BigDecimal a, BigDecimal b) {
@@ -92,7 +93,7 @@ public class CalculatorTest {
             log.warn("{} != {}", a, b);
         }
 
-        Assert.assertEquals(0, a.compareTo(b));
+        Assertions.assertEquals(0, a.compareTo(b));
     }
 
 }

@@ -1,66 +1,60 @@
 package learning.examples.expression;
 
-import static learning.examples.expression.CalculatorSupportedOperatorType.getByNotation;
 import learning.stack.LinkedStack;
 import learning.stack.Stack;
 
 import java.math.BigDecimal;
-import java.util.regex.Pattern;
+
+import static learning.examples.expression.CalculatorSupportedOperatorType.isNonFunctionByNotationExists;
+import static learning.examples.expression.CalculatorSupportedOperatorType.getByNotation;
 
 class InfixExpressionParser {
-    private static final Pattern VALIDATION_PATTERN = Pattern.compile("^[0-9-+*.!()^/%\\s]+$");
-
-    private final Stack<String> operators;
-
-    public InfixExpressionParser() {
-        operators = new LinkedStack<>();
-    }
+    private final Stack<String> operators = new LinkedStack<>();
+    private StringBuilder currentOperandString = new StringBuilder();
+    private StringBuilder currentOperatorString = new StringBuilder();
+    private boolean minusIsOperandPart = true;
 
     public String parseExpression(String expression) {
         clear();
 
-        if (expression == null || !VALIDATION_PATTERN.matcher(expression).matches()) {
+        if (expression == null) {
             throw new IllegalArgumentException("Invalid input string " + expression + " for math expression parser");
         }
 
         StringBuilder result = new StringBuilder();
 
+        // remove all whitespaces
         String sanitizedExpression = expression.replaceAll("\\s", "");
-        StringBuilder currentNumberString = new StringBuilder();
-        boolean minusIsNumberPart = true;
 
         for (int i = 0; i < sanitizedExpression.length(); i++) {
             char currentChar = sanitizedExpression.charAt(i);
 
-            // handle numbers and dots
-            if (currentChar == '-' && minusIsNumberPart && currentNumberString.toString().isEmpty()) {
-                currentNumberString.append(currentChar);
-                minusIsNumberPart = false;
-                continue;
-            }
-
-            // handle numbers and dots
             if (isNumberPart(currentChar)) {
-                currentNumberString.append(currentChar);
+                if (!currentOperatorString.isEmpty()) {
+                    handleAndClearCurrentOperator(result);
+                }
+
+                minusIsOperandPart = false;
+                currentOperandString.append(currentChar);
                 continue;
             }
 
-            // not a number? save current number
-            if (currentNumberString.length() > 0) {
-                result.append(formatNumber(currentNumberString.toString()));
-                currentNumberString = new StringBuilder();
+            if (!currentOperandString.isEmpty()) {
+                handleCurrentOperand(result);
             }
 
-            // handle operators
-            handleOperator(result, currentChar);
+            // handle an operator
+            handleOperatorChar(result, currentChar);
+            minusIsOperandPart = currentChar != ')';
+        }
 
-            minusIsNumberPart = currentChar != ')';
+        if (!currentOperatorString.isEmpty()) {
+            handleAndClearCurrentOperator(result);
         }
 
         while (!operators.isEmpty()) {
-            if (!currentNumberString.toString().isEmpty()) {
-                result.append(formatNumber(currentNumberString.toString()));
-                currentNumberString = new StringBuilder();
+            if (!currentOperandString.toString().isEmpty()) {
+                handleCurrentOperand(result);
             }
             String element = operators.pop();
             if (!element.equals("(")) {
@@ -71,19 +65,23 @@ class InfixExpressionParser {
         return result.toString();
     }
 
-    private void handleOperator(StringBuilder result, char currentChar) {
-        String operatorStr = Character.toString(currentChar);
+    private void handleCurrentOperand(StringBuilder result) {
+        result.append(formatNumber(currentOperandString.toString()));
+        currentOperandString = new StringBuilder();
+    }
 
-        if (operatorStr.equals("(")) {
-            // handle '('
+    private void handleOperatorChar(StringBuilder result, char currentChar) {
+        String operatorStr = currentOperatorString.toString();
 
-            operators.push(operatorStr);
+        if (currentChar == '(') {
+            if (!operatorStr.isEmpty()) {
+                handleAndClearCurrentOperator(result);
+            }
+            operators.push("(");
             return;
         }
 
-        if (operatorStr.equals(")")) {
-            // handle ')'
-
+        if (currentChar == ')') {
             while (true) {
                 if (operators.isEmpty()) {
                     throw new IllegalArgumentException("Incorrect math expression: Missed bracket");
@@ -96,13 +94,27 @@ class InfixExpressionParser {
                 }
 
                 result.append(formatOperator(operatorInBrackets));
-
             }
 
             return;
         }
 
-        // handle operators
+        currentOperatorString.append(currentChar);
+
+        if (isNonFunctionByNotationExists(currentOperatorString.toString())) {
+            handleAndClearCurrentOperator(result);
+        }
+    }
+
+    private void handleAndClearCurrentOperator(StringBuilder result) {
+        handleCurrentOperator(result);
+        currentOperatorString = new StringBuilder();
+    }
+
+
+    private void handleCurrentOperator(StringBuilder result) {
+        String operatorStr = currentOperatorString.toString();
+
         if (operators.isEmpty()) {
             operators.push(operatorStr);
             return;
@@ -124,7 +136,8 @@ class InfixExpressionParser {
     }
 
     private boolean isNumberPart(char character) {
-        return Character.isDigit(character) || character == '.';
+        return (character == '-' && minusIsOperandPart && currentOperandString.toString().isEmpty()) ||
+                Character.isDigit(character) || character == '.';
     }
 
     private String formatNumber(String numberString) {
@@ -132,12 +145,13 @@ class InfixExpressionParser {
     }
 
     private String formatOperator(String operatorString) {
-        return operatorString;
+        return '{' + operatorString + '}';
     }
 
     public void clear() {
         operators.clear();
+        currentOperatorString = new StringBuilder();
+        currentOperandString = new StringBuilder();
+        minusIsOperandPart = true;
     }
-
-
 }

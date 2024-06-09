@@ -1,47 +1,47 @@
 package learning.queue;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class QueueTest {
+class QueueTest {
 
     @Test
-    public void testQueue() {
+    void testQueue() {
         Queue<Integer> queue = new CycleArrayQueue<>(5, Integer.class);
 
-        Assert.assertTrue(queue.isEmpty());
+        Assertions.assertTrue(queue.isEmpty());
 
         queue.push(1);
 
-        Assert.assertFalse(queue.isEmpty());
+        Assertions.assertFalse(queue.isEmpty());
 
         queue.push(2);
         queue.push(3);
         queue.push(4);
         queue.push(5);
 
-        Assert.assertTrue(queue.isFull());
+        Assertions.assertTrue(queue.isFull());
 
-        Assert.assertEquals(1, (int) queue.pop());
+        Assertions.assertEquals(1, (int) queue.pop());
 
-        Assert.assertFalse(queue.isFull());
+        Assertions.assertFalse(queue.isFull());
 
         queue.pop();
 
         queue.push(6);
         queue.push(7);
 
-        Assert.assertTrue(queue.isFull());
+        Assertions.assertTrue(queue.isFull());
 
         queue.pop();
 
-        Assert.assertFalse(queue.isFull());
+        Assertions.assertFalse(queue.isFull());
 
         queue.pop();
         queue.pop();
 
-        Assert.assertEquals(6, (int) queue.pop());
-        Assert.assertEquals(7, (int) queue.pop());
-        Assert.assertTrue(queue.isEmpty());
+        Assertions.assertEquals(6, (int) queue.pop());
+        Assertions.assertEquals(7, (int) queue.pop());
+        Assertions.assertTrue(queue.isEmpty());
     }
 }

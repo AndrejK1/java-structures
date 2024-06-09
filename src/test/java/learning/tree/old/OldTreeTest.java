@@ -3,15 +3,15 @@ package learning.tree.old;
 
 import learning.tree.old.binary.BinaryTree;
 import learning.tree.old.binary.IntegerTree;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class OldTreeTest {
+class OldTreeTest {
 
     @Test
-    public void testBST() {
+    void testBST() {
         List<Integer> values = Arrays.asList(10, 5, 2, 7, 15, 13, 18, 21, 17);
 
         Tree<Integer> tree = new IntegerTree();
