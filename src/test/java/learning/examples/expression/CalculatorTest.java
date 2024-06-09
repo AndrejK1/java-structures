@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 @Slf4j
 class CalculatorTest {
@@ -81,7 +82,39 @@ class CalculatorTest {
     }
 
     @Test
+    void bracketsTest() {
+        assertEquals(BigDecimal.valueOf(5), calculator.calculateExpression("(3+2)"));
+        assertEquals(BigDecimal.valueOf(1), calculator.calculateExpression("(3-2)"));
+        assertEquals(BigDecimal.valueOf(6), calculator.calculateExpression("(3*2)"));
+        assertEquals(BigDecimal.valueOf(2), calculator.calculateExpression("(4/2)"));
+        assertEquals(BigDecimal.valueOf(9), calculator.calculateExpression("(3^2)"));
+        assertEquals(BigDecimal.valueOf(1), calculator.calculateExpression("(3%2)"));
+        assertEquals(BigDecimal.valueOf(6), calculator.calculateExpression("(3!)"));
+
+        assertEquals(BigDecimal.valueOf(10), calculator.calculateExpression("(1+-2)+(-3+2)+-1+(-1)+1+(11+2)"));
+        assertEquals(BigDecimal.valueOf(12), calculator.calculateExpression("(3*2)*2"));
+        assertEquals(BigDecimal.valueOf(1), calculator.calculateExpression("(4/2)/2"));
+        assertEquals(BigDecimal.valueOf(81), calculator.calculateExpression("(3^2)^2"));
+        assertEquals(BigDecimal.valueOf(0), calculator.calculateExpression("(99%10)%3"));
+        assertEquals(BigDecimal.valueOf(720), calculator.calculateExpression("(3!)!"));
+        assertEquals(BigDecimal.valueOf(6), calculator.calculateExpression("(3)!"));
+
+        assertEquals(BigDecimal.valueOf(Math.PI), calculator.calculateExpression("(PI)"));
+        assertEquals(BigDecimal.valueOf(Math.E), calculator.calculateExpression("(E)"));
+        assertEquals(BigDecimal.valueOf(Math.TAU), calculator.calculateExpression("(TAU)"));
+
+       assertEquals(BigDecimal.ZERO, calculator.calculateExpression("(sin(0))"));
+       assertEquals(BigDecimal.valueOf(-1), calculator.calculateExpression("(cos(PI))").round(new MathContext(2)));
+       assertEquals(BigDecimal.ZERO, calculator.calculateExpression("(tan(0))"));
+       assertEquals(BigDecimal.valueOf(1), calculator.calculateExpression("(ln(E))").round(new MathContext(2)));
+       assertEquals(BigDecimal.valueOf(1), calculator.calculateExpression("(lg(10))"));
+       assertEquals(BigDecimal.valueOf(2), calculator.calculateExpression("(abs(-2))"));
+    }
+
+    @Test
     void testComplexExpressions() {
+        assertEquals(BigDecimal.valueOf(6), calculator.calculateExpression("((abs(2 - 4) * (2 + -4) ^ (3!) - sin(0) + lg(3 ^ 4 + 57 / 3) * ln(E ^ 0.5) - -4 * -2) ^ (2 / 4) - abs(-4 * 2))!"));
+        assertEquals(BigDecimal.valueOf(720), calculator.calculateExpression("(-1*(-2 * 3))!"));
         assertEquals(BigDecimal.valueOf(-6), calculator.calculateExpression("-1 * 3!"));
         assertEquals(BigDecimal.valueOf(38.8), calculator.calculateExpression("-1 * -2 - 3 + -5 * (-3 - 5) - 5 ^ -1"));
         assertEquals(BigDecimal.valueOf(17), calculator.calculateExpression("(1.5 / (1+2) - 4 * 4 ^ 2 + 100 % 60) / 2 % 3.25 + 22 - 9 ^ 0.5"));
