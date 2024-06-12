@@ -24,6 +24,7 @@ public class SudokuSolver {
     private final Map<Integer, List<Integer>> rowsPositions;
     private final Map<Integer, List<Integer>> columnsPositions;
     private final Map<Integer, List<Integer>> squaresPositions;
+    private boolean isDirty = false;
 
     public SudokuSolver(List<Integer> input) {
         validate(input);
@@ -39,6 +40,12 @@ public class SudokuSolver {
     }
 
     public Solution solveSudoku() {
+        if (isDirty) {
+            throw new IllegalStateException("Sudoku solver was already used!");
+        }
+
+        isDirty = true;
+
         boolean solved;
 
         while (true) {
@@ -271,7 +278,6 @@ public class SudokuSolver {
                     }
                 }
             }
-
         }
 
         return detectedChange;
