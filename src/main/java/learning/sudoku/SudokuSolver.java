@@ -25,11 +25,13 @@ public class SudokuSolver {
     private final Map<Integer, List<Integer>> rowsPositions;
     private final Map<Integer, List<Integer>> columnsPositions;
     private final Map<Integer, List<Integer>> squaresPositions;
-    private boolean isDirty;
-    private int solutionStep;
 
     @Setter
     private SudokuPrinter sudokuPrinter;
+
+    private boolean isDirty;
+    private int solutionStep;
+    private boolean detectedChange;
 
     public static SudokuSolver newSudokuSolverInstance(List<Integer> input) {
         return new SudokuSolver(input);
@@ -60,13 +62,19 @@ public class SudokuSolver {
         boolean solved;
 
         while (true) {
-            boolean isChanged = runSimpleCheck() || runDeepCheck();
+            detectedChange = false;
+
+            runSimpleCheck();
+
+            if (!detectedChange) {
+                runDeepCheck();
+            }
 
             solutionStep++;
 
             solved = isSolved();
 
-            if (solved || !isChanged) {
+            if (solved || !detectedChange) {
                 break;
             }
 
@@ -85,7 +93,7 @@ public class SudokuSolver {
     }
 
     private boolean isSolved() {
-        return possibleNumbers.stream().allMatch(l -> l.size() == 1);
+        return solvedNumbersByPositions.size() == fieldSize * fieldSize;
     }
 
     private List<Integer> covertResult() {
@@ -94,9 +102,7 @@ public class SudokuSolver {
                 .toList();
     }
 
-    private boolean runSimpleCheck() {
-        boolean detectedChange = false;
-
+    private void runSimpleCheck() {
         for (Map.Entry<Integer, Integer> entry : solvedNumbersByPositions.entrySet()) {
             Integer solvedPosition = entry.getKey();
             Integer solvedValue = entry.getValue();
@@ -116,8 +122,6 @@ public class SudokuSolver {
         }
 
         updateSolvedPositions();
-
-        return detectedChange;
     }
 
     private void updateSolvedPositions() {
@@ -134,34 +138,50 @@ public class SudokuSolver {
         }
     }
 
-    private boolean runDeepCheck() {
-        boolean detectedChange = false;
-
+    private void runDeepCheck() {
         for (List<Integer> squarePositions : rowsPositions.values()) {
-            detectedChange = runDeepCheckAtPositions(squarePositions) || detectedChange;
+            runDeepCheckAtPositions(squarePositions);
         }
 
         for (List<Integer> positions : columnsPositions.values()) {
-            detectedChange = runDeepCheckAtPositions(positions) || detectedChange;
+            runDeepCheckAtPositions(positions);
         }
 
         for (List<Integer> positions : squaresPositions.values()) {
-            detectedChange = runDeepCheckAtPositions(positions) || detectedChange;
+            runDeepCheckAtPositions(positions);
         }
-
-        return detectedChange;
     }
 
-    private boolean runDeepCheckAtPositions(List<Integer> positionsToCheck) {
+    private void runDeepCheckAtPositions(List<Integer> positionsToCheck) {
         Map<Integer, List<Integer>> possibleNumbersByPos = positionsToCheck.stream()
                 .collect(Collectors.toMap(Function.identity(), possibleNumbers::get));
 
-        return checkForUniqueValueAcrossPossible(possibleNumbersByPos) || checkForEqualGroups(possibleNumbersByPos);
+        checkForUniqueValueAcrossPossible(possibleNumbersByPos);
+        updateSolvedPositions();
+
+        checkForEqualGroups(possibleNumbersByPos);
+        updateSolvedPositions();
     }
 
-    private boolean checkForUniqueValueAcrossPossible(Map<Integer, List<Integer>> possibleNumbersByPos) {
-        boolean detectedChange = false;
+    private void checkForUniqueValueAcrossPossible(Map<Integer, List<Integer>> possibleNumbersByPos) {
+        Map<Integer, List<Integer>> unsolvedNumbersWithPositions = findAllPossiblePositionsForUnsolvedNumbers(possibleNumbersByPos);
 
+        for (Map.Entry<Integer, List<Integer>> numberWithPossiblePositions : unsolvedNumbersWithPositions.entrySet()) {
+            Integer numberValue = numberWithPossiblePositions.getKey();
+            List<Integer> numberPositions = numberWithPossiblePositions.getValue();
+
+            if (numberPositions.size() == 1) {
+                solvedNumbersByPositions.putIfAbsent(numberPositions.getFirst(), numberValue);
+                possibleNumbers.set(numberPositions.getFirst(), new ArrayList<>(List.of(numberValue)));
+                detectedChange = true;
+                continue;
+            }
+
+            clearValueFromUniqueGroupsIfPossible(numberPositions, numberValue);
+        }
+    }
+
+    private static Map<Integer, List<Integer>> findAllPossiblePositionsForUnsolvedNumbers(Map<Integer, List<Integer>> possibleNumbersByPos) {
         Map<Integer, List<Integer>> numbersAndPositions = new HashMap<>();
         List<Integer> exclusions = new ArrayList<>();
 
@@ -178,47 +198,43 @@ public class SudokuSolver {
         }
 
         exclusions.forEach(numbersAndPositions::remove);
-
-        for (Map.Entry<Integer, List<Integer>> numberWithPossiblePositions : numbersAndPositions.entrySet()) {
-            if (numberWithPossiblePositions.getValue().size() == 1) {
-                possibleNumbers.set(numberWithPossiblePositions.getValue().getFirst(), new ArrayList<>(List.of(numberWithPossiblePositions.getKey())));
-                detectedChange = true;
-                continue;
-            }
-
-            Place samePlacePositions = isSamePlacePositions(numberWithPossiblePositions.getValue());
-
-            if (samePlacePositions.row != -1) {
-                rowsPositions.get(samePlacePositions.row)
-                        .stream()
-                        .filter(pos -> !numberWithPossiblePositions.getValue().contains(pos))
-                        .map(possibleNumbers::get)
-                        .forEach(pos -> pos.remove(numberWithPossiblePositions.getKey()));
-            }
-
-            if (samePlacePositions.column != -1) {
-                columnsPositions.get(samePlacePositions.column)
-                        .stream()
-                        .filter(pos -> !numberWithPossiblePositions.getValue().contains(pos))
-                        .map(possibleNumbers::get)
-                        .forEach(pos -> pos.remove(numberWithPossiblePositions.getKey()));
-            }
-
-            if (samePlacePositions.square != -1) {
-                squaresPositions.get(samePlacePositions.square)
-                        .stream()
-                        .filter(pos -> !numberWithPossiblePositions.getValue().contains(pos))
-                        .map(possibleNumbers::get)
-                        .forEach(pos -> pos.remove(numberWithPossiblePositions.getKey()));
-            }
-        }
-
-        return detectedChange;
+        return numbersAndPositions;
     }
 
-    private boolean checkForEqualGroups(Map<Integer, List<Integer>> possibleNumbersByPos) {
-        boolean detectedChange = false;
+    private void clearValueFromUniqueGroupsIfPossible(List<Integer> numberPositions, Integer numberValue) {
+        Place samePlacePositions = isSamePlacePositions(numberPositions);
 
+        if (samePlacePositions.row != -1) {
+            detectedChange = rowsPositions.get(samePlacePositions.row)
+                    .stream()
+                    .filter(pos -> !numberPositions.contains(pos))
+                    .map(possibleNumbers::get)
+                    .map(pos -> pos.remove(numberValue))
+                    .reduce(detectedChange, (r1, r2) -> r1 || r2);
+        }
+
+        if (samePlacePositions.column != -1) {
+            detectedChange = columnsPositions.get(samePlacePositions.column)
+                    .stream()
+                    .filter(pos -> !numberPositions.contains(pos))
+                    .map(possibleNumbers::get)
+                    .map(pos -> pos.remove(numberValue))
+                    .reduce(detectedChange, (r1, r2) -> r1 || r2);
+
+        }
+
+        if (samePlacePositions.square != -1) {
+            detectedChange = squaresPositions.get(samePlacePositions.square)
+                    .stream()
+                    .filter(pos -> !numberPositions.contains(pos))
+                    .map(possibleNumbers::get)
+                    .map(pos -> pos.remove(numberValue))
+                    .reduce(detectedChange, (r1, r2) -> r1 || r2);
+
+        }
+    }
+
+    private void checkForEqualGroups(Map<Integer, List<Integer>> possibleNumbersByPos) {
         Map<Integer, Map<Integer, List<Integer>>> positionGroupsBySizeToCheck = possibleNumbersByPos
                 .entrySet()
                 .stream()
@@ -253,8 +269,6 @@ public class SudokuSolver {
                 }
             }
         }
-
-        return detectedChange;
     }
 
     private static void validate(List<Integer> input) {
