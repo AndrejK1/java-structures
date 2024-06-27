@@ -66,7 +66,9 @@ class SudokuSolverTest {
     }
 
     private static void solveAndValidate(List<Integer> template) {
-        SudokuSolver sudokuSolver = new SudokuSolver(template);
+        SudokuSolver sudokuSolver = SudokuSolver.newSudokuSolverInstance(template);
+        sudokuSolver.setSudokuPrinter(getSudokuPrinter(true, false, true));
+
         SudokuSolver.Solution solution = sudokuSolver.solveSudoku();
 
         Assertions.assertTrue(solution.isSolved());
@@ -93,5 +95,55 @@ class SudokuSolverTest {
         rowsValues.forEach((k, v) -> Assertions.assertEquals(solution.getFieldSize(), v.size()));
         columnsValues.forEach((k, v) -> Assertions.assertEquals(solution.getFieldSize(), v.size()));
         squaresValues.forEach((k, v) -> Assertions.assertEquals(solution.getFieldSize(), v.size()));
+    }
+
+    private static SudokuPrinter getSudokuPrinter(boolean printMove, boolean printPossibleNumbers, boolean printSolved) {
+        return (solutionStep, solvedNumbersByPositions, possibleNumbers, fieldSize, isSolved) -> {
+
+            if (printMove || (printSolved && isSolved)) {
+                StringBuilder stringBuilder = new StringBuilder();
+
+                for (int i = 0; i < fieldSize * fieldSize; i++) {
+                    Integer value = solvedNumbersByPositions.getOrDefault(i, 0);
+
+                    stringBuilder.append(value == 0 ? "-" : value);
+
+                    if ((i + 1) % fieldSize == 0) {
+                        stringBuilder.append('\n');
+                    } else {
+                        stringBuilder.append(' ');
+                    }
+                }
+
+                log.info("Step: {}, Solved: {}, Solved positions\n{}", solutionStep, isSolved, stringBuilder);
+            }
+
+            if (printPossibleNumbers) {
+                StringBuilder stringBuilder = new StringBuilder();
+
+                int maxStrLength = possibleNumbers.stream()
+                        .map(Object::toString)
+                        .map(s -> s.replace(" ", ""))
+                        .mapToInt(String::length)
+                        .max()
+                        .orElse(0);
+
+                for (int i = 0; i < possibleNumbers.size(); i++) {
+                    String value = possibleNumbers.get(i).toString().replace(" ", "");
+
+                    stringBuilder.append(value);
+
+                    stringBuilder.append(" ".repeat(Math.max(0, maxStrLength - value.length())));
+
+                    if ((i + 1) % fieldSize == 0) {
+                        stringBuilder.append('\n');
+                    } else {
+                        stringBuilder.append(' ');
+                    }
+                }
+
+                log.info("Step: {}, Solved: {}, Possible Numbers\n{}", solutionStep, isSolved, stringBuilder);
+            }
+        };
     }
 }

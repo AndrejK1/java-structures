@@ -3,6 +3,7 @@ package learning.sudoku;
 import additional.Pair;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,9 +12,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SudokuSolver {
     private final int fieldSize;
@@ -24,9 +25,17 @@ public class SudokuSolver {
     private final Map<Integer, List<Integer>> rowsPositions;
     private final Map<Integer, List<Integer>> columnsPositions;
     private final Map<Integer, List<Integer>> squaresPositions;
-    private boolean isDirty = false;
+    private boolean isDirty;
+    private int solutionStep;
 
-    public SudokuSolver(List<Integer> input) {
+    @Setter
+    private SudokuPrinter sudokuPrinter;
+
+    public static SudokuSolver newSudokuSolverInstance(List<Integer> input) {
+        return new SudokuSolver(input);
+    }
+
+    private SudokuSolver(List<Integer> input) {
         validate(input);
         this.fieldSize = getFieldSize(input.size());
         this.smallSquaresSize = (int) Math.sqrt(fieldSize);
@@ -46,63 +55,33 @@ public class SudokuSolver {
 
         isDirty = true;
 
+        printState();
+
         boolean solved;
 
         while (true) {
-            boolean isChanged = runSolvingStep() || runDeepCheck();
+            boolean isChanged = runSimpleCheck() || runDeepCheck();
+
+            solutionStep++;
 
             solved = isSolved();
 
             if (solved || !isChanged) {
                 break;
             }
+
+            printState();
         }
+
+        printState();
 
         return new Solution(solved, covertResult(), fieldSize, smallSquaresInLine);
     }
 
-    public String getStringRepresentation() {
-        StringBuilder stringBuilder = new StringBuilder();
-        List<Integer> solution = covertResult();
-
-        for (int i = 0; i < solution.size(); i++) {
-            Integer value = solution.get(i);
-
-            stringBuilder.append(value == 0 ? "-" : value);
-
-            if ((i + 1) % 9 == 0) {
-                stringBuilder.append('\n');
-            } else {
-                stringBuilder.append(' ');
-            }
+    private void printState() {
+        if (sudokuPrinter != null) {
+            sudokuPrinter.printState(solutionStep, solvedNumbersByPositions, possibleNumbers, fieldSize, isSolved());
         }
-        return stringBuilder.toString();
-    }
-
-    public String getPossibleNumbersStringRepresentation() {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        int maxStrLength = possibleNumbers.stream()
-                .map(Object::toString)
-                .map(s -> s.replace(" ", ""))
-                .mapToInt(String::length)
-                .max()
-                .orElse(0);
-
-        for (int i = 0; i < possibleNumbers.size(); i++) {
-            String value = possibleNumbers.get(i).toString().replace(" ", "");
-
-            stringBuilder.append(value);
-
-            stringBuilder.append(" ".repeat(Math.max(0, maxStrLength - value.length())));
-
-            if ((i + 1) % 9 == 0) {
-                stringBuilder.append('\n');
-            } else {
-                stringBuilder.append(' ');
-            }
-        }
-        return stringBuilder.toString();
     }
 
     private boolean isSolved() {
@@ -115,26 +94,8 @@ public class SudokuSolver {
                 .toList();
     }
 
-    private boolean runSolvingStep() {
+    private boolean runSimpleCheck() {
         boolean detectedChange = false;
-
-        Map<Integer, Integer> solvedPos = new HashMap<>();
-
-        BiPredicate<Integer, Integer> func = (pos, value) -> {
-            List<Integer> sameRowPossibleNumbers = possibleNumbers.get(pos);
-
-            boolean removed = sameRowPossibleNumbers.remove(value);
-
-            if (sameRowPossibleNumbers.size() == 1) {
-                solvedPos.put(pos, sameRowPossibleNumbers.getFirst());
-            }
-
-            if (sameRowPossibleNumbers.isEmpty()) {
-                throw new IllegalStateException("0 possible situations at pos " + pos);
-            }
-
-            return removed;
-        };
 
         for (Map.Entry<Integer, Integer> entry : solvedNumbersByPositions.entrySet()) {
             Integer solvedPosition = entry.getKey();
@@ -142,31 +103,35 @@ public class SudokuSolver {
 
             Pair<Integer, Integer> solvedValueCoords = getCoords(solvedPosition);
 
-            for (int i = 0; i < fieldSize; i++) {
-                int sameRowPos = toPos(solvedValueCoords.getKey(), i);
-                if (sameRowPos != solvedPosition) {
-                    detectedChange = func.test(sameRowPos, solvedValue) || detectedChange;
-                }
-
-                int sameColumnPos = toPos(i, solvedValueCoords.getValue());
-                if (sameColumnPos != solvedPosition) {
-                    detectedChange = func.test(sameColumnPos, solvedValue) || detectedChange;
-                }
-            }
-
-            // square check
-            List<Integer> squarePositions = squaresPositions.get(getSquarePosFromPos(solvedPosition));
-
-            for (Integer inSquarePosition : squarePositions) {
-                if (!inSquarePosition.equals(solvedPosition)) {
-                    detectedChange = func.test(inSquarePosition, solvedValue) || detectedChange;
-                }
-            }
+            // get all coords that are related to solved position and run number deletion from possible options
+            detectedChange = Stream.of(
+                            rowsPositions.get(solvedValueCoords.getKey()),
+                            columnsPositions.get(solvedValueCoords.getValue()),
+                            squaresPositions.get(getSquarePosFromPos(solvedPosition)))
+                    .flatMap(List::stream)
+                    .filter(positionToCheck -> !positionToCheck.equals(solvedPosition))
+                    .map(possibleNumbers::get)
+                    .map(numbers -> numbers.remove(solvedValue))
+                    .reduce(detectedChange, (r1, r2) -> r1 || r2);
         }
 
-        solvedPos.forEach(solvedNumbersByPositions::putIfAbsent);
+        updateSolvedPositions();
 
         return detectedChange;
+    }
+
+    private void updateSolvedPositions() {
+        for (int position = 0; position < possibleNumbers.size(); position++) {
+            List<Integer> possibleValuesAtPos = possibleNumbers.get(position);
+
+            if (possibleValuesAtPos.isEmpty()) {
+                throw new IllegalStateException("0 possible situations at position " + position);
+            }
+
+            if (possibleValuesAtPos.size() == 1) {
+                solvedNumbersByPositions.putIfAbsent(position, possibleValuesAtPos.getFirst());
+            }
+        }
     }
 
     private boolean runDeepCheck() {
@@ -187,19 +152,16 @@ public class SudokuSolver {
         return detectedChange;
     }
 
-    private boolean runDeepCheckAtPositions(List<Integer> squarePositions) {
-        boolean detectedChange = false;
-
-        Map<Integer, List<Integer>> possibleNumbersByPos = squarePositions.stream()
+    private boolean runDeepCheckAtPositions(List<Integer> positionsToCheck) {
+        Map<Integer, List<Integer>> possibleNumbersByPos = positionsToCheck.stream()
                 .collect(Collectors.toMap(Function.identity(), possibleNumbers::get));
 
-        Map<Integer, Map<Integer, List<Integer>>> positionGroupsBySizeToCheck = possibleNumbersByPos
-                .entrySet()
-                .stream()
-                .filter(posList -> posList.getValue().size() > 1)
-                .collect(Collectors.groupingBy(m -> m.getValue().size(), Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        return checkForUniqueValueAcrossPossible(possibleNumbersByPos) || checkForEqualGroups(possibleNumbersByPos);
+    }
 
-        // check for unique value
+    private boolean checkForUniqueValueAcrossPossible(Map<Integer, List<Integer>> possibleNumbersByPos) {
+        boolean detectedChange = false;
+
         Map<Integer, List<Integer>> numbersAndPositions = new HashMap<>();
         List<Integer> exclusions = new ArrayList<>();
 
@@ -217,41 +179,53 @@ public class SudokuSolver {
 
         exclusions.forEach(numbersAndPositions::remove);
 
-        for (Map.Entry<Integer, List<Integer>> e : numbersAndPositions.entrySet()) {
-            if (e.getValue().size() == 1) {
-                possibleNumbers.set(e.getValue().getFirst(), new ArrayList<>(List.of(e.getKey())));
+        for (Map.Entry<Integer, List<Integer>> numberWithPossiblePositions : numbersAndPositions.entrySet()) {
+            if (numberWithPossiblePositions.getValue().size() == 1) {
+                possibleNumbers.set(numberWithPossiblePositions.getValue().getFirst(), new ArrayList<>(List.of(numberWithPossiblePositions.getKey())));
                 detectedChange = true;
                 continue;
             }
 
-            Place samePlacePositions = isSamePlacePositions(e.getValue());
+            Place samePlacePositions = isSamePlacePositions(numberWithPossiblePositions.getValue());
 
             if (samePlacePositions.row != -1) {
                 rowsPositions.get(samePlacePositions.row)
                         .stream()
-                        .filter(pos -> !e.getValue().contains(pos))
+                        .filter(pos -> !numberWithPossiblePositions.getValue().contains(pos))
                         .map(possibleNumbers::get)
-                        .forEach(pos -> pos.remove(e.getKey()));
+                        .forEach(pos -> pos.remove(numberWithPossiblePositions.getKey()));
             }
 
             if (samePlacePositions.column != -1) {
                 columnsPositions.get(samePlacePositions.column)
                         .stream()
-                        .filter(pos -> !e.getValue().contains(pos))
+                        .filter(pos -> !numberWithPossiblePositions.getValue().contains(pos))
                         .map(possibleNumbers::get)
-                        .forEach(pos -> pos.remove(e.getKey()));
+                        .forEach(pos -> pos.remove(numberWithPossiblePositions.getKey()));
             }
 
             if (samePlacePositions.square != -1) {
                 squaresPositions.get(samePlacePositions.square)
                         .stream()
-                        .filter(pos -> !e.getValue().contains(pos))
+                        .filter(pos -> !numberWithPossiblePositions.getValue().contains(pos))
                         .map(possibleNumbers::get)
-                        .forEach(pos -> pos.remove(e.getKey()));
+                        .forEach(pos -> pos.remove(numberWithPossiblePositions.getKey()));
             }
         }
 
-        // check for equal groups
+        return detectedChange;
+    }
+
+    private boolean checkForEqualGroups(Map<Integer, List<Integer>> possibleNumbersByPos) {
+        boolean detectedChange = false;
+
+        Map<Integer, Map<Integer, List<Integer>>> positionGroupsBySizeToCheck = possibleNumbersByPos
+                .entrySet()
+                .stream()
+                .filter(posList -> posList.getValue().size() > 1)
+                .collect(Collectors.groupingBy(m -> m.getValue().size(), Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+
         for (Map.Entry<Integer, Map<Integer, List<Integer>>> positionGroups : positionGroupsBySizeToCheck.entrySet()) {
             Integer groupSize = positionGroups.getKey();
             Map<Integer, List<Integer>> groupByPosition = positionGroups.getValue();
@@ -272,7 +246,7 @@ public class SudokuSolver {
                     continue;
                 }
 
-                for (Integer pos : squarePositions) {
+                for (Integer pos : possibleNumbersByPos.keySet()) {
                     if (!setPositions.contains(pos)) {
                         detectedChange = possibleNumbers.get(pos).removeAll(valuesSet) || detectedChange;
                     }
