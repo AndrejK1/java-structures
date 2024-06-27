@@ -71,30 +71,30 @@ class SudokuSolverTest {
 
         SudokuSolver.Solution solution = sudokuSolver.solveSudoku();
 
-        Assertions.assertTrue(solution.isSolved());
+        Assertions.assertTrue(solution.solved());
 
         Map<Integer, Set<Integer>> rowsValues = new HashMap<>();
         Map<Integer, Set<Integer>> columnsValues = new HashMap<>();
         Map<Integer, Set<Integer>> squaresValues = new HashMap<>();
 
-        for (int i = 0; i < solution.getField().size(); i++) {
-            Pair<Integer, Integer> coords = Pair.of(i / solution.getFieldSize(), i % solution.getFieldSize());
+        for (int i = 0; i < solution.field().size(); i++) {
+            Pair<Integer, Integer> coords = Pair.of(i / solution.fieldSize(), i % solution.fieldSize());
 
             rowsValues.computeIfAbsent(coords.getKey(), k -> new HashSet<>());
-            rowsValues.get(coords.getKey()).add(solution.getField().get(i));
+            rowsValues.get(coords.getKey()).add(solution.field().get(i));
 
             columnsValues.computeIfAbsent(coords.getValue(), k -> new HashSet<>());
-            columnsValues.get(coords.getValue()).add(solution.getField().get(i));
+            columnsValues.get(coords.getValue()).add(solution.field().get(i));
 
-            int squarePos = coords.getKey() / solution.getSmallSquaresInLine() * solution.getSmallSquaresInLine()
-                    + coords.getValue() / solution.getSmallSquaresInLine();
+            int squarePos = coords.getKey() / solution.smallSquaresInLine() * solution.smallSquaresInLine()
+                    + coords.getValue() / solution.smallSquaresInLine();
             squaresValues.computeIfAbsent(squarePos, k -> new HashSet<>());
-            squaresValues.get(squarePos).add(solution.getField().get(i));
+            squaresValues.get(squarePos).add(solution.field().get(i));
         }
 
-        rowsValues.forEach((k, v) -> Assertions.assertEquals(solution.getFieldSize(), v.size()));
-        columnsValues.forEach((k, v) -> Assertions.assertEquals(solution.getFieldSize(), v.size()));
-        squaresValues.forEach((k, v) -> Assertions.assertEquals(solution.getFieldSize(), v.size()));
+        rowsValues.forEach((k, v) -> Assertions.assertEquals(solution.fieldSize(), v.size()));
+        columnsValues.forEach((k, v) -> Assertions.assertEquals(solution.fieldSize(), v.size()));
+        squaresValues.forEach((k, v) -> Assertions.assertEquals(solution.fieldSize(), v.size()));
     }
 
     private static SudokuPrinter getSudokuPrinter(boolean printMove, boolean printPossibleNumbers, boolean printSolved) {
