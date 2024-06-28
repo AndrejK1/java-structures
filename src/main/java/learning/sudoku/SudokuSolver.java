@@ -16,6 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static learning.sudoku.SudokuSolver.Utils.findAllPossiblePositionsForUnsolvedNumbers;
 import static learning.sudoku.SudokuSolver.Utils.getCoords;
 import static learning.sudoku.SudokuSolver.Utils.getFieldNumbersCount;
 import static learning.sudoku.SudokuSolver.Utils.getFieldSize;
@@ -186,26 +187,6 @@ public class SudokuSolver {
         }
     }
 
-    private static Map<Integer, List<Integer>> findAllPossiblePositionsForUnsolvedNumbers(Map<Integer, List<Integer>> possibleNumbersByPos) {
-        Map<Integer, List<Integer>> numbersAndPositions = new HashMap<>();
-        List<Integer> exclusions = new ArrayList<>();
-
-        for (Map.Entry<Integer, List<Integer>> entry : possibleNumbersByPos.entrySet()) {
-            if (entry.getValue().size() <= 1) {
-                exclusions.add(entry.getValue().getFirst());
-                continue;
-            }
-
-            entry.getValue().forEach(value -> {
-                numbersAndPositions.putIfAbsent(value, new ArrayList<>());
-                numbersAndPositions.get(value).add(entry.getKey());
-            });
-        }
-
-        exclusions.forEach(numbersAndPositions::remove);
-        return numbersAndPositions;
-    }
-
     private void clearValueFromUniqueGroupsIfPossible(List<Integer> numberPositions, Integer numberValue) {
         Place samePlacePositions = isSamePlacePositions(numberPositions, smallSquaresSize);
 
@@ -313,6 +294,26 @@ public class SudokuSolver {
             if (fieldSize / smallSquaresSize != smallSquaresSize) {
                 throw new IllegalArgumentException("Can't fit squares");
             }
+        }
+
+        static Map<Integer, List<Integer>> findAllPossiblePositionsForUnsolvedNumbers(Map<Integer, List<Integer>> possibleNumbersByPos) {
+            Map<Integer, List<Integer>> numbersAndPositions = new HashMap<>();
+            List<Integer> exclusions = new ArrayList<>();
+
+            for (Map.Entry<Integer, List<Integer>> entry : possibleNumbersByPos.entrySet()) {
+                if (entry.getValue().size() <= 1) {
+                    exclusions.add(entry.getValue().getFirst());
+                    continue;
+                }
+
+                entry.getValue().forEach(value -> {
+                    numbersAndPositions.putIfAbsent(value, new ArrayList<>());
+                    numbersAndPositions.get(value).add(entry.getKey());
+                });
+            }
+
+            exclusions.forEach(numbersAndPositions::remove);
+            return numbersAndPositions;
         }
 
         static int getFieldNumbersCount(int fieldSize) {
