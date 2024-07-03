@@ -47,29 +47,34 @@ public class SudokuSolver {
     public Solution solveSudoku() {
         printState();
 
-        boolean detectedChange;
-        boolean solved = false;
+        SolutionStepInfo lastSolutionStepInfo;
 
         do {
-            detectedChange = false;
+            lastSolutionStepInfo = runSolutionStep();
+            printState();
+        } while (lastSolutionStepInfo.detectedChange() && !lastSolutionStepInfo.solved());
 
-            for (SudokuAlgorithm algorithm : algorithms) {
-                detectedChange = algorithm.runAlgorithmOnSudoku(this) || detectedChange;
+        return new Solution(lastSolutionStepInfo.solved(), solutionStep, new SudokuHolder(covertResult()));
+    }
 
-                if (detectedChange) {
-                    updateSolvedPositionsFromNotes();
-                }
-            }
+    public SolutionStepInfo runSolutionStep() {
+        boolean detectedChange = false;
+        boolean solved = false;
+
+        for (SudokuAlgorithm algorithm : algorithms) {
+            detectedChange = algorithm.runAlgorithmOnSudoku(this) || detectedChange;
 
             if (detectedChange) {
-                solutionStep++;
-                solved = isSolved();
+                updateSolvedPositionsFromNotes();
             }
+        }
 
-            printState();
-        } while (detectedChange && !solved);
+        if (detectedChange) {
+            solutionStep++;
+            solved = isSolved();
+        }
 
-        return new Solution(solved, solutionStep, new SudokuHolder(covertResult()));
+        return new SolutionStepInfo(solved, detectedChange, solutionStep, new SudokuHolder(covertResult()));
     }
 
     public boolean isSolved() {
@@ -103,5 +108,8 @@ public class SudokuSolver {
     }
 
     public record Solution(boolean solved, int solutionStep, SudokuHolder solution) {
+    }
+
+    public record SolutionStepInfo(boolean solved, boolean detectedChange, int solutionStep, SudokuHolder currentState) {
     }
 }
