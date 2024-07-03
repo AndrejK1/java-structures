@@ -5,6 +5,7 @@ import learning.sudoku.SudokuSolver;
 import learning.sudoku.SudokuUtils;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -42,34 +43,28 @@ public class PointingGroupsCheck extends SudokuPositionGroupAlgorithm {
                 continue;
             }
 
-            SudokuHolder.Place samePlacePositions = sudokuSolver.getSudoku().isSamePlacePositions(numberPositions);
+            SudokuHolder.Place samePlacePositionsInfo = sudokuSolver.getSudoku().isSamePlacePositions(numberPositions);
 
-            if (samePlacePositions.row() != -1) {
-                detectedChange = sudoku.getRowsPositions().get(samePlacePositions.row())
-                        .stream()
-                        .filter(pos -> !numberPositions.contains(pos))
-                        .map(sudokuSolver.getPossibleNumbersNotes()::get)
-                        .map(pos -> pos.remove(numberValue))
-                        .reduce(detectedChange, (r1, r2) -> r1 || r2);
+            List<Integer> samePlacePositions = new ArrayList<>();
+
+            if (samePlacePositionsInfo.row() != -1) {
+                samePlacePositions.addAll(sudoku.getRowPositions(samePlacePositionsInfo.row()));
             }
 
-            if (samePlacePositions.column() != -1) {
-                detectedChange = sudoku.getColumnsPositions().get(samePlacePositions.column())
-                        .stream()
-                        .filter(pos -> !numberPositions.contains(pos))
-                        .map(sudokuSolver.getPossibleNumbersNotes()::get)
-                        .map(pos -> pos.remove(numberValue))
-                        .reduce(detectedChange, (r1, r2) -> r1 || r2);
+            if (samePlacePositionsInfo.column() != -1) {
+                samePlacePositions.addAll(sudoku.getColumnPositions(samePlacePositionsInfo.column()));
             }
 
-            if (samePlacePositions.square() != -1) {
-                detectedChange = sudoku.getSquaresPositions().get(samePlacePositions.square())
-                        .stream()
-                        .filter(pos -> !numberPositions.contains(pos))
-                        .map(sudokuSolver.getPossibleNumbersNotes()::get)
-                        .map(pos -> pos.remove(numberValue))
-                        .reduce(detectedChange, (r1, r2) -> r1 || r2);
+            if (samePlacePositionsInfo.square() != -1) {
+                samePlacePositions.addAll(sudoku.getSquarePositions(samePlacePositionsInfo.square()));
             }
+
+            detectedChange = samePlacePositions
+                    .stream()
+                    .filter(pos -> !numberPositions.contains(pos))
+                    .map(sudokuSolver.getPossibleNumbersNotes()::get)
+                    .map(pos -> pos.remove(numberValue))
+                    .reduce(detectedChange, (r1, r2) -> r1 || r2);
         }
 
         return detectedChange;

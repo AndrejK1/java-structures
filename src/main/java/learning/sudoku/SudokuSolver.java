@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class SudokuSolver {
         this.sudoku = sudoku;
         this.solvedNumbersByPositions = new HashMap<>();
         this.possibleNumbersNotes = new ArrayList<>(this.sudoku.getFieldCellCount());
-        this.algorithms = algorithms;
+        this.algorithms = algorithms.stream().sorted(Comparator.comparing(SudokuAlgorithm::getPriority)).toList();
 
         for (int i = 0; i < this.sudoku.getField().size(); i++) {
             Integer element = this.sudoku.getField().get(i);
@@ -51,7 +52,6 @@ public class SudokuSolver {
 
         do {
             detectedChange = false;
-
 
             for (SudokuAlgorithm algorithm : algorithms) {
                 detectedChange = algorithm.runAlgorithmOnSudoku(this) || detectedChange;

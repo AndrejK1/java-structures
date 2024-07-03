@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,53 +15,74 @@ class SudokuSolverTest {
 
     @Test
     void testSolveSudokuMedium() {
-        List<Integer> template = List.of(
-                0, 5, 0, 1, 0, 0, 0, 0, 0,
-                2, 0, 4, 0, 0, 0, 0, 9, 3,
-                0, 0, 0, 0, 0, 3, 4, 5, 0,
-                7, 2, 1, 0, 3, 8, 6, 4, 0,
-                4, 3, 0, 0, 5, 7, 9, 8, 1,
-                0, 0, 0, 0, 6, 1, 0, 0, 2,
-                0, 0, 0, 0, 0, 4, 0, 0, 9,
-                1, 0, 5, 3, 0, 0, 8, 0, 0,
-                6, 4, 0, 8, 0, 2, 0, 0, 0
-        );
+        String fieldData =
+                "050|100|000" +
+                "204|000|093" +
+                "000|003|450" +
+                "-----------" +
+                "721|038|640" +
+                "430|057|981" +
+                "000|061|002" +
+                "-----------" +
+                "000|004|009" +
+                "105|300|800" +
+                "640|802|000";
 
-        solveAndValidate(template);
+        solveAndValidate(fieldDataToIntegerList(fieldData));
     }
 
     @Test
     void testSolveSudokuMaster() {
-        List<Integer> template = List.of(
-                1, 0, 0, 5, 0, 0, 7, 0, 9,
-                0, 0, 8, 0, 0, 0, 0, 0, 2,
-                0, 6, 0, 9, 0, 0, 0, 0, 0,
-                0, 1, 0, 2, 4, 0, 0, 6, 0,
-                0, 0, 7, 0, 6, 0, 0, 0, 0,
-                6, 0, 0, 0, 9, 1, 0, 0, 0,
-                0, 0, 0, 6, 0, 9, 4, 3, 0,
-                0, 0, 0, 0, 7, 4, 0, 8, 1,
-                0, 0, 0, 0, 0, 0, 0, 0, 0
-        );
+        String fieldData =
+                "100|500|709" +
+                "008|000|002" +
+                "060|900|000" +
+                "-----------" +
+                "010|240|060" +
+                "007|060|000" +
+                "600|091|000" +
+                "-----------" +
+                "000|609|430" +
+                "000|074|081" +
+                "000|000|000";
 
-        solveAndValidate(template);
+        solveAndValidate(fieldDataToIntegerList(fieldData));
     }
 
     @Test
     void testSolveSudokuExpert() {
-        List<Integer> template = List.of(
-                7, 0, 0, 0, 0, 3, 0, 0, 1,
-                9, 3, 0, 0, 0, 8, 5, 0, 0,
-                0, 0, 0, 0, 0, 9, 0, 0, 2,
-                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                3, 0, 0, 1, 0, 0, 0, 0, 5,
-                4, 0, 0, 0, 0, 7, 0, 8, 0,
-                5, 0, 0, 6, 0, 0, 0, 0, 4,
-                0, 2, 9, 0, 0, 0, 0, 0, 0,
-                0, 0, 4, 7, 0, 0, 2, 0, 0
-        );
+        String fieldData =
+                "700|003|001" +
+                "930|008|500" +
+                "000|009|002" +
+                "-----------" +
+                "000|000|000" +
+                "300|100|005" +
+                "400|007|080" +
+                "-----------" +
+                "500|600|004" +
+                "029|000|000" +
+                "004|700|200";
 
-        solveAndValidate(template);
+        solveAndValidate(fieldDataToIntegerList(fieldData));
+    }
+
+    @Test
+    void testSolveSudokuExpert2() {
+        String fieldData =
+                "700|003|001" +
+                "930|008|500" +
+                "000|009|002" +
+                "-----------" +
+                "000|000|000" +
+                "300|100|005" +
+                "400|007|080" +
+                "-----------" +
+                "500|600|004" +
+                "029|000|000" +
+                "004|700|200";
+
+        solveAndValidate(fieldDataToIntegerList(fieldData));
     }
 
     private static void solveAndValidate(List<Integer> template) {
@@ -133,6 +155,20 @@ class SudokuSolverTest {
                 log.info("Step: {}, Solved: {}, Possible Numbers\n{}", sudokuSolver.getSolutionStep(), sudokuSolver.isSolved(), stringBuilder);
             }
         }
+    }
+
+    private static List<Integer> fieldDataToIntegerList(String fieldData) {
+        List<Integer> list = new ArrayList<>();
+
+        for (int i = 0; i < fieldData.length(); i++) {
+            char ch = fieldData.charAt(i);
+
+            if (Character.isDigit(ch)){
+                list.add(Integer.valueOf(String.valueOf(ch)));
+            }
+        }
+
+        return list;
     }
 
 }

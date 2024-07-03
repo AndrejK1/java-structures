@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 
 @NoArgsConstructor
-public class HiddenGroupCheck extends SudokuPositionGroupAlgorithm {
+public class ObviousAndHiddenGroupCheck extends SudokuPositionGroupAlgorithm {
 
     @Override
     public int getPriority() {
@@ -52,9 +52,17 @@ public class HiddenGroupCheck extends SudokuPositionGroupAlgorithm {
             List<Integer> positionsOfHiddenGroup = hiddenGroupsByPositionsEntry.getKey();
             List<Integer> hiddenGroup = hiddenGroupsByPositionsEntry.getValue();
 
+            // update hidden groups positions with hidden group values
             for (Integer positionOfHiddenGroup : positionsOfHiddenGroup) {
                 List<Integer> previousGroup = sudokuSolver.getPossibleNumbersNotes().set(positionOfHiddenGroup, new ArrayList<>(hiddenGroup));
-                detectedChange = !previousGroup.equals(hiddenGroup);
+                detectedChange = !previousGroup.equals(hiddenGroup) || detectedChange;
+            }
+
+            // remove hidden group values from other positions
+            for (Integer pos : possibleNumbersByPos.keySet()) {
+                if (!positionsOfHiddenGroup.contains(pos)) {
+                    detectedChange = sudokuSolver.getPossibleNumbersNotes().get(pos).removeAll(hiddenGroup) || detectedChange;
+                }
             }
         }
 
