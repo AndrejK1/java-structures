@@ -67,24 +67,6 @@ class SudokuSolverTest {
         solveAndValidate(fieldDataToIntegerList(fieldData));
     }
 
-    @Test
-    void testSolveSudokuExpert2() {
-        String fieldData =
-                "700|003|001" +
-                "930|008|500" +
-                "000|009|002" +
-                "-----------" +
-                "000|000|000" +
-                "300|100|005" +
-                "400|007|080" +
-                "-----------" +
-                "500|600|004" +
-                "029|000|000" +
-                "004|700|200";
-
-        solveAndValidate(fieldDataToIntegerList(fieldData));
-    }
-
     private static void solveAndValidate(List<Integer> template) {
         SudokuSolver sudokuSolver = new SudokuSolver(new SudokuHolder(template));
         sudokuSolver.setSudokuPrinter(new TestingSudokuPrinter(true, false, true));

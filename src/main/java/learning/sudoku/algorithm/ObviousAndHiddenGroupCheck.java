@@ -18,7 +18,7 @@ public class ObviousAndHiddenGroupCheck extends SudokuPositionGroupAlgorithm {
 
     @Override
     public int getPriority() {
-        return 50;
+        return 30;
     }
 
     @Override

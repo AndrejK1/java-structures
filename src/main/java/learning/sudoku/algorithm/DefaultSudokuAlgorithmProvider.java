@@ -12,10 +12,9 @@ public class DefaultSudokuAlgorithmProvider {
 
     public static List<SudokuAlgorithm> getDefaultSudokuAlgorithms() {
         return Stream.of(
-                        new HiddenSingleCheck(),
-                        new PointingGroupsCheck(),
-                        new ObviousAndHiddenGroupCheck(),
-                        new SinglePositionCheck()
+                        new SinglePositionCheck(),
+                        new HiddenSingleAndPointingGroupsCheck(),
+                        new ObviousAndHiddenGroupCheck()
                 )
                 .sorted(Comparator.comparing(SudokuAlgorithm::getPriority))
                 .toList();
