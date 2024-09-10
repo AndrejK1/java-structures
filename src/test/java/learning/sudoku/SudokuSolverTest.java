@@ -45,4 +45,13 @@ class SudokuSolverTest {
         failedToSolve.forEach(mission -> log.error("Failed to solve mission: {}", mission));
         Assertions.assertTrue(failedToSolve.isEmpty(), "Failed to solve " + failedToSolve.size() + "/" + sudokuCases.size() + " cases");
     }
+
+    @Test
+    void testSolvingLargeBlankSudoku() {
+        String blankSudoku = "0".repeat(256);
+        SudokuSolver.Solution solution = solve(fieldDataToIntegerList(blankSudoku));
+
+        Assertions.assertTrue(solution.solved());
+        Assertions.assertTrue(isSolutionCorrect(solution));
+    }
 }

@@ -10,6 +10,7 @@ record TestingSudokuPrinter(boolean printMove,
                             boolean printSolved) implements SudokuPrinter {
     @Override
     public void printState(SudokuSolver sudokuSolver) {
+        int maxNumberLength = String.valueOf(sudokuSolver.getSudoku().getFieldWidth()).length();
 
         if (printMove || (printSolved && sudokuSolver.isSolved())) {
             StringBuilder stringBuilder = new StringBuilder();
@@ -17,7 +18,12 @@ record TestingSudokuPrinter(boolean printMove,
             for (int i = 0; i < sudokuSolver.getSudoku().getFieldCellCount(); i++) {
                 List<Integer> value = sudokuSolver.getPossibleNumbersByPosition(i);
 
-                stringBuilder.append(value.size() == 1 ? value.getFirst() : "-");
+                if (value.size() == 1) {
+                    String strValue = value.getFirst().toString();
+                    stringBuilder.append(" ".repeat(maxNumberLength - strValue.length())).append(strValue);
+                } else {
+                    stringBuilder.append("-".repeat(maxNumberLength));
+                }
 
                 if ((i + 1) % sudokuSolver.getSudoku().getFieldWidth() == 0) {
                     stringBuilder.append('\n');

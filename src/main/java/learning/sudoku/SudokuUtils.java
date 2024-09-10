@@ -46,7 +46,7 @@ public class SudokuUtils {
         return alg +
                 ": pos " + String.format("%1$2s", pos) + " (" + positionCoordinates.getKey() + "," + positionCoordinates.getValue() + ")" +
                 " | state: " + sudokuHolder.getPossibleNumbersByPosition(pos) +
-                " | subj: " + stateNew;
+                " | update: " + stateNew;
     }
 
     public static boolean haveIntersection(List<Integer> left, List<Integer> right) {

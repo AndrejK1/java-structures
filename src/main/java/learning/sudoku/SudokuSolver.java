@@ -1,7 +1,6 @@
 package learning.sudoku;
 
 import learning.sudoku.algorithm.DefaultSudokuAlgorithmProvider;
-import learning.sudoku.algorithm.RecursiveGuesser;
 import learning.sudoku.algorithm.SudokuAlgorithm;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,7 +47,6 @@ public class SudokuSolver {
     }
 
     public Solution solveSudoku() {
-        printState();
         runInit();
         printState();
 
@@ -61,12 +59,15 @@ public class SudokuSolver {
 
         if (!lastSolutionStepInfo.solved()) {
             lastSolutionStepInfo = runGuessingStep();
+            printState();
         }
 
         return new Solution(lastSolutionStepInfo.solved(), solutionStep, new SudokuHolder(covertResult()));
     }
 
     public void runInit() {
+        log.info("Running Initialization Process");
+
         for (int position = 0; position < this.sudoku.getField().size(); position++) {
             Integer element = this.sudoku.getField().get(position);
 
@@ -74,6 +75,8 @@ public class SudokuSolver {
                 updatePosition(position, element);
             }
         }
+
+        solutionStep++;
     }
 
     public SolutionStepInfo runSolutionStep() {
@@ -81,7 +84,7 @@ public class SudokuSolver {
         boolean solved = false;
 
         for (SudokuAlgorithm algorithm : algorithms) {
-            log.info("Running Algorithm {}", algorithm.getName());
+            log.info("Running Algorithm: {}", algorithm.getName());
             detectedChange = runAlgorithmAndCheckForChange(algorithm) || detectedChange;
         }
 
@@ -94,7 +97,7 @@ public class SudokuSolver {
     }
 
     public SolutionStepInfo runGuessingStep() {
-        log.info("Running Algorithm {}", guessingAlgorithm.getClass().getName());
+        log.info("Running Algorithm: {}", guessingAlgorithm.getClass().getName());
         runAlgorithmAndCheckForChange(guessingAlgorithm);
 
         solutionStep++;
@@ -115,6 +118,23 @@ public class SudokuSolver {
         return possibleNumbersNotes.stream()
                 .map(list -> list.size() == 1 ? list.getFirst() : 0)
                 .toList();
+    }
+
+    /**
+     * Rewrites solver calculated notes
+     *
+     * @param possibleNumbersNotes new solver notes
+     */
+    public void rewriteState(List<List<Integer>> possibleNumbersNotes) {
+        this.possibleNumbersNotes.clear();
+        this.possibleNumbersNotes.addAll(possibleNumbersNotes);
+    }
+
+    /**
+     * Retrieves copy (high-level only) for solver calculated notes
+     */
+    public List<List<Integer>> getState() {
+        return new ArrayList<>(possibleNumbersNotes);
     }
 
     public boolean removeFromPosition(int position, Integer value) {
