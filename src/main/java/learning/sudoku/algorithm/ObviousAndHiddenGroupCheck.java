@@ -3,6 +3,7 @@ package learning.sudoku.algorithm;
 import learning.sudoku.SudokuSolver;
 import learning.sudoku.SudokuUtils;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,9 +13,17 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static learning.sudoku.SudokuUtils.buildLog;
+import static learning.sudoku.SudokuUtils.haveIntersection;
 
+@Slf4j
 @NoArgsConstructor
 public class ObviousAndHiddenGroupCheck extends SudokuPositionGroupAlgorithm {
+
+    @Override
+    public String getName() {
+        return "Obvious & Hidden Group Finder";
+    }
 
     @Override
     public int getPriority() {
@@ -31,7 +40,7 @@ public class ObviousAndHiddenGroupCheck extends SudokuPositionGroupAlgorithm {
         boolean detectedChange = false;
 
         Map<Integer, List<Integer>> possibleNumbersByPos = positionsToCheck.stream()
-                .collect(Collectors.toMap(Function.identity(), sudokuSolver.getPossibleNumbersNotes()::get));
+                .collect(Collectors.toMap(Function.identity(), sudokuSolver::getPossibleNumbersByPosition));
 
         Map<Integer, List<Integer>> unsolvedNumbersWithPositions = SudokuUtils.findAllPossiblePositionsForUnsolvedNumbers(possibleNumbersByPos);
 
@@ -54,14 +63,23 @@ public class ObviousAndHiddenGroupCheck extends SudokuPositionGroupAlgorithm {
 
             // update hidden/obvious groups positions with hidden group values
             for (Integer positionOfHiddenGroup : positionsOfHiddenGroup) {
-                List<Integer> previousGroup = sudokuSolver.getPossibleNumbersNotes().set(positionOfHiddenGroup, new ArrayList<>(hiddenGroup));
-                detectedChange = !previousGroup.equals(hiddenGroup) || detectedChange;
+
+                if (haveIntersection(sudokuSolver.getPossibleNumbersByPosition(positionOfHiddenGroup), hiddenGroup)) {
+                    log.info(buildLog(sudokuSolver, "Group Override", positionOfHiddenGroup, hiddenGroup));
+                }
+
+                detectedChange = sudokuSolver.updatePosition(positionOfHiddenGroup, new ArrayList<>(hiddenGroup)) || detectedChange;
             }
 
             // remove hidden/obvious group values from other positions
             for (Integer pos : possibleNumbersByPos.keySet()) {
                 if (!positionsOfHiddenGroup.contains(pos)) {
-                    detectedChange = sudokuSolver.getPossibleNumbersNotes().get(pos).removeAll(hiddenGroup) || detectedChange;
+
+                    if (haveIntersection(sudokuSolver.getPossibleNumbersByPosition(pos), hiddenGroup)) {
+                        log.info(buildLog(sudokuSolver, "Group Remove", pos, hiddenGroup));
+                    }
+
+                    detectedChange = sudokuSolver.removeFromPosition(pos, hiddenGroup) || detectedChange;
                 }
             }
         }

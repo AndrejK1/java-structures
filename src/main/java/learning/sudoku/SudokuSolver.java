@@ -1,50 +1,55 @@
 package learning.sudoku;
 
 import learning.sudoku.algorithm.DefaultSudokuAlgorithmProvider;
+import learning.sudoku.algorithm.RecursiveGuesser;
 import learning.sudoku.algorithm.SudokuAlgorithm;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-@Getter
+@Slf4j
 public class SudokuSolver {
+    @Getter
     private final SudokuHolder sudoku;
-    private final List<List<Integer>> possibleNumbersNotes;
-    private final Map<Integer, Integer> solvedNumbersByPositions;
+    @Getter
     private final List<SudokuAlgorithm> algorithms;
+    @Getter
+    private final SudokuAlgorithm guessingAlgorithm;
+
+    private final List<List<Integer>> possibleNumbersNotes;
+
     @Setter
     private SudokuPrinter sudokuPrinter;
+    @Getter
     private int solutionStep;
 
     public SudokuSolver(SudokuHolder sudoku) {
-        this(sudoku, DefaultSudokuAlgorithmProvider.getDefaultSudokuAlgorithms());
+        this(
+                sudoku,
+                DefaultSudokuAlgorithmProvider.getDefaultSudokuAlgorithms(),
+                DefaultSudokuAlgorithmProvider.getDefaultGuessingAlgorithm()
+        );
     }
 
-    public SudokuSolver(SudokuHolder sudoku, List<SudokuAlgorithm> algorithms) {
+    public SudokuSolver(SudokuHolder sudoku, List<SudokuAlgorithm> algorithms, SudokuAlgorithm guessingAlgorithm) {
         this.sudoku = sudoku;
-        this.solvedNumbersByPositions = new HashMap<>();
         this.possibleNumbersNotes = new ArrayList<>(this.sudoku.getFieldCellCount());
         this.algorithms = algorithms.stream().sorted(Comparator.comparing(SudokuAlgorithm::getPriority)).toList();
+        this.guessingAlgorithm = guessingAlgorithm;
 
         for (int i = 0; i < this.sudoku.getField().size(); i++) {
-            Integer element = this.sudoku.getField().get(i);
-
-            if (element == null || element == 0) {
-                possibleNumbersNotes.add(i, SudokuUtils.generateListWithNumbersTill(sudoku.getFieldWidth()));
-            } else {
-                possibleNumbersNotes.add(i, new ArrayList<>(Collections.singletonList(element)));
-                solvedNumbersByPositions.put(i, element);
-            }
+            possibleNumbersNotes.add(i, SudokuUtils.generateListWithNumbersTill(sudoku.getFieldWidth()));
         }
     }
 
     public Solution solveSudoku() {
+        printState();
+        runInit();
         printState();
 
         SolutionStepInfo lastSolutionStepInfo;
@@ -54,7 +59,21 @@ public class SudokuSolver {
             printState();
         } while (lastSolutionStepInfo.detectedChange() && !lastSolutionStepInfo.solved());
 
+        if (!lastSolutionStepInfo.solved()) {
+            lastSolutionStepInfo = runGuessingStep();
+        }
+
         return new Solution(lastSolutionStepInfo.solved(), solutionStep, new SudokuHolder(covertResult()));
+    }
+
+    public void runInit() {
+        for (int position = 0; position < this.sudoku.getField().size(); position++) {
+            Integer element = this.sudoku.getField().get(position);
+
+            if (element != null && element != 0) {
+                updatePosition(position, element);
+            }
+        }
     }
 
     public SolutionStepInfo runSolutionStep() {
@@ -62,11 +81,8 @@ public class SudokuSolver {
         boolean solved = false;
 
         for (SudokuAlgorithm algorithm : algorithms) {
-            detectedChange = algorithm.runAlgorithmOnSudoku(this) || detectedChange;
-
-            if (detectedChange) {
-                updateSolvedPositionsFromNotes();
-            }
+            log.info("Running Algorithm {}", algorithm.getName());
+            detectedChange = runAlgorithmAndCheckForChange(algorithm) || detectedChange;
         }
 
         if (detectedChange) {
@@ -77,8 +93,22 @@ public class SudokuSolver {
         return new SolutionStepInfo(solved, detectedChange, solutionStep, new SudokuHolder(covertResult()));
     }
 
+    public SolutionStepInfo runGuessingStep() {
+        log.info("Running Algorithm {}", guessingAlgorithm.getClass().getName());
+        runAlgorithmAndCheckForChange(guessingAlgorithm);
+
+        solutionStep++;
+        boolean solved = isSolved();
+
+        return new SolutionStepInfo(solved, true, solutionStep, new SudokuHolder(covertResult()));
+    }
+
+    public boolean runAlgorithmAndCheckForChange(SudokuAlgorithm algorithm) {
+        return algorithm.runAlgorithmOnSudoku(this);
+    }
+
     public boolean isSolved() {
-        return solvedNumbersByPositions.size() == sudoku.getFieldCellCount();
+        return possibleNumbersNotes.stream().filter(p -> p.size() == 1).count() == sudoku.getFieldCellCount();
     }
 
     private List<Integer> covertResult() {
@@ -87,18 +117,54 @@ public class SudokuSolver {
                 .toList();
     }
 
-    private void updateSolvedPositionsFromNotes() {
-        for (int position = 0; position < possibleNumbersNotes.size(); position++) {
-            List<Integer> possibleValuesAtPos = possibleNumbersNotes.get(position);
+    public boolean removeFromPosition(int position, Integer value) {
+        return removeFromPosition(position, Collections.singletonList(value));
+    }
 
-            if (possibleValuesAtPos.isEmpty()) {
-                throw new IllegalStateException("0 possible situations at position " + position);
-            }
+    public List<Integer> getPossibleNumbersByPosition(int position) {
+        return possibleNumbersNotes.get(position);
+    }
 
-            if (possibleValuesAtPos.size() == 1) {
-                solvedNumbersByPositions.putIfAbsent(position, possibleValuesAtPos.getFirst());
+    public boolean removeFromPosition(int position, List<Integer> values) {
+        ArrayList<Integer> currentValues = new ArrayList<>(possibleNumbersNotes.get(position));
+
+        if (currentValues.removeAll(values)) {
+            updatePosition(position, currentValues);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean updatePosition(int position, Integer value) {
+        return updatePosition(position, Collections.singletonList(value));
+    }
+
+    public boolean updatePosition(int position, List<Integer> values) {
+        boolean detectedChange = false;
+        ArrayList<Integer> updatedValues = new ArrayList<>(values);
+
+        if (updatedValues.isEmpty()) {
+            throw new EmptyPositionNoteException(position);
+        }
+
+        if (possibleNumbersNotes.get(position).equals(updatedValues)) {
+            return detectedChange;
+        }
+
+        possibleNumbersNotes.set(position, updatedValues);
+
+        if (updatedValues.size() == 1) {
+            for (Integer positionToUpdate : sudoku.getAllPositionsInPlace(position)) {
+                if (positionToUpdate == position) {
+                    continue;
+                }
+
+                detectedChange = removeFromPosition(positionToUpdate, updatedValues.getFirst()) || detectedChange;
             }
         }
+
+        return detectedChange;
     }
 
     private void printState() {
@@ -110,6 +176,7 @@ public class SudokuSolver {
     public record Solution(boolean solved, int solutionStep, SudokuHolder solution) {
     }
 
-    public record SolutionStepInfo(boolean solved, boolean detectedChange, int solutionStep, SudokuHolder currentState) {
+    public record SolutionStepInfo(boolean solved, boolean detectedChange, int solutionStep,
+                                   SudokuHolder currentState) {
     }
 }

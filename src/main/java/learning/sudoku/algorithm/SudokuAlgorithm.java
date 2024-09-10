@@ -3,6 +3,8 @@ package learning.sudoku.algorithm;
 import learning.sudoku.SudokuSolver;
 
 public interface SudokuAlgorithm {
+    String getName();
+
     int getPriority();
 
     Difficulty getDifficulty();

@@ -4,6 +4,7 @@ import learning.sudoku.SudokuHolder;
 import learning.sudoku.SudokuSolver;
 import learning.sudoku.SudokuUtils;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +12,16 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static learning.sudoku.SudokuUtils.buildLog;
 
+@Slf4j
 @NoArgsConstructor
 public class HiddenSingleAndPointingGroupsCheck extends SudokuPositionGroupAlgorithm {
+
+    @Override
+    public String getName() {
+        return "Hidden Single & Pointing Groups Finder";
+    }
 
     @Override
     public int getPriority() {
@@ -31,7 +39,7 @@ public class HiddenSingleAndPointingGroupsCheck extends SudokuPositionGroupAlgor
         SudokuHolder sudoku = sudokuSolver.getSudoku();
 
         Map<Integer, List<Integer>> possibleNumbersByPos = positionsToCheck.stream()
-                .collect(Collectors.toMap(Function.identity(), sudokuSolver.getPossibleNumbersNotes()::get));
+                .collect(Collectors.toMap(Function.identity(), sudokuSolver::getPossibleNumbersByPosition));
 
         Map<Integer, List<Integer>> unsolvedNumbersWithPositions = SudokuUtils.findAllPossiblePositionsForUnsolvedNumbers(possibleNumbersByPos);
 
@@ -41,12 +49,13 @@ public class HiddenSingleAndPointingGroupsCheck extends SudokuPositionGroupAlgor
 
             if (numberPositions.size() == 1) {
                 // hidden single check
-                sudokuSolver.getPossibleNumbersNotes().set(numberPositions.getFirst(), new ArrayList<>(List.of(numberValue)));
+                log.info(buildLog(sudokuSolver, "Hidden single", numberPositions.getFirst(), numberValue));
+                sudokuSolver.updatePosition(numberPositions.getFirst(), numberValue);
                 detectedChange = true;
             }
 
             // pointing groups check
-            SudokuHolder.Place samePlacePositionsInfo = sudokuSolver.getSudoku().isSamePlacePositions(numberPositions);
+            SudokuHolder.Place samePlacePositionsInfo = sudoku.isSamePlacePositions(numberPositions);
 
             List<Integer> samePlacePositions = new ArrayList<>();
 
@@ -65,8 +74,12 @@ public class HiddenSingleAndPointingGroupsCheck extends SudokuPositionGroupAlgor
             detectedChange = samePlacePositions
                     .stream()
                     .filter(pos -> !numberPositions.contains(pos))
-                    .map(sudokuSolver.getPossibleNumbersNotes()::get)
-                    .map(pos -> pos.remove(numberValue))
+                    .map(pos -> {
+                        if (sudokuSolver.getPossibleNumbersByPosition(pos).contains(numberValue)) {
+                            log.info(buildLog(sudokuSolver, "Pointing Group", pos, numberValue));
+                        }
+                        return sudokuSolver.removeFromPosition(pos, numberValue);
+                    })
                     .reduce(detectedChange, (r1, r2) -> r1 || r2);
         }
 

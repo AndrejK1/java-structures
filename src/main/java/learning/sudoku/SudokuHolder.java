@@ -4,12 +4,15 @@ import additional.Pair;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 public class SudokuHolder {
@@ -94,6 +97,24 @@ public class SudokuHolder {
     public int getSquarePosition(int cellPosition) {
         Pair<Integer, Integer> squareCoords = getSquareCoordinates(cellPosition);
         return toSquarePosition(squareCoords.getKey(), squareCoords.getValue());
+    }
+
+    public Place getPositionPlace(int position) {
+        Pair<Integer, Integer> coords = getPositionCoordinates(position);
+        return new Place(coords.getKey(), coords.getValue(), getSquarePosition(position));
+    }
+
+    public List<Integer> getAllPositionsInPlace(int position) {
+        Place positionPlace = getPositionPlace(position);
+
+        return Stream.of(
+                        rowsPositions.get(positionPlace.row()),
+                        columnsPositions.get(positionPlace.column()),
+                        squaresPositions.get(positionPlace.square())
+                )
+                .flatMap(Collection::stream)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     public Place isSamePlacePositions(List<Integer> positions) {
