@@ -1,4 +1,4 @@
-package learning.sudoku;
+package learning.examples.sudoku;
 
 import additional.Pair;
 import lombok.experimental.UtilityClass;

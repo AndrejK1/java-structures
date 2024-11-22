@@ -1,4 +1,4 @@
-package learning.sudoku;
+package learning.examples.sudoku;
 
 import lombok.Getter;
 

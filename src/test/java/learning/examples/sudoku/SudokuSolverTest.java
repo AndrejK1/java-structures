@@ -1,4 +1,4 @@
-package learning.sudoku;
+package learning.examples.sudoku;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -8,18 +8,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static learning.sudoku.SudokuTestingUtils.fieldDataFromList;
-import static learning.sudoku.SudokuTestingUtils.fieldDataToIntegerList;
-import static learning.sudoku.SudokuTestingUtils.isSolutionCorrect;
-import static learning.sudoku.SudokuTestingUtils.readSudokuTestingCasesFromFile;
-import static learning.sudoku.SudokuTestingUtils.solve;
-
 @Slf4j
 class SudokuSolverTest {
 
     @Test
     void testScenariosFromFile() {
-        List<SudokuCase> sudokuCases = readSudokuTestingCasesFromFile("sudoku.json");
+        List<SudokuCase> sudokuCases = SudokuTestingUtils.readSudokuTestingCasesFromFile("sudoku.json");
 
         Set<String> failedToSolve = new HashSet<>();
 
@@ -28,16 +22,16 @@ class SudokuSolverTest {
             log.info("---- SOLVING SUDOKU # {} ----", i);
             log.info("Sudoku mission {}", sudokuCase.getMission());
 
-            SudokuSolver.Solution solution = solve(fieldDataToIntegerList(sudokuCase.getMission()));
+            SudokuSolver.Solution solution = SudokuTestingUtils.solve(SudokuTestingUtils.fieldDataToIntegerList(sudokuCase.getMission()));
 
             if (!solution.solved()) {
                 log.error("==== SUDOKU #{} was NOT SOLVED! ====", i);
                 failedToSolve.add(sudokuCase.getMission());
-            } else if (!isSolutionCorrect(solution)) {
+            } else if (!SudokuTestingUtils.isSolutionCorrect(solution)) {
                 log.error("==== SUDOKU #{} has  INCORRECT SOLUTION! ====", i);
                 failedToSolve.add(sudokuCase.getMission());
             } else {
-                String fieldData = fieldDataFromList(solution.solution().getField());
+                String fieldData = SudokuTestingUtils.fieldDataFromList(solution.solution().getField());
                 log.info("==== SUDOKU #{} was SOLVED (" + (sudokuCase.getSolution().equals(fieldData) ? "matching" : "alternate") + " solution)! ====", i);
             }
         }
@@ -49,9 +43,9 @@ class SudokuSolverTest {
     @Test
     void testSolvingLargeBlankSudoku() {
         String blankSudoku = "0".repeat(256);
-        SudokuSolver.Solution solution = solve(fieldDataToIntegerList(blankSudoku));
+        SudokuSolver.Solution solution = SudokuTestingUtils.solve(SudokuTestingUtils.fieldDataToIntegerList(blankSudoku));
 
         Assertions.assertTrue(solution.solved());
-        Assertions.assertTrue(isSolutionCorrect(solution));
+        Assertions.assertTrue(SudokuTestingUtils.isSolutionCorrect(solution));
     }
 }

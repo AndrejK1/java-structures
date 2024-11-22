@@ -1,6 +1,6 @@
-package learning.sudoku.algorithm;
+package learning.examples.sudoku.algorithm;
 
-import learning.sudoku.SudokuSolver;
+import learning.examples.sudoku.SudokuSolver;
 
 import java.util.List;
 

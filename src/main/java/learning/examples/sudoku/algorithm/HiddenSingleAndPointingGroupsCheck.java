@@ -1,8 +1,8 @@
-package learning.sudoku.algorithm;
+package learning.examples.sudoku.algorithm;
 
-import learning.sudoku.SudokuHolder;
-import learning.sudoku.SudokuSolver;
-import learning.sudoku.SudokuUtils;
+import learning.examples.sudoku.SudokuHolder;
+import learning.examples.sudoku.SudokuSolver;
+import learning.examples.sudoku.SudokuUtils;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static learning.sudoku.SudokuUtils.buildLog;
 
 @Slf4j
 @NoArgsConstructor
@@ -49,7 +47,7 @@ public class HiddenSingleAndPointingGroupsCheck extends SudokuPositionGroupAlgor
 
             if (numberPositions.size() == 1) {
                 // hidden single check
-                log.info(buildLog(sudokuSolver, "Hidden single", numberPositions.getFirst(), numberValue));
+                log.info(SudokuUtils.buildLog(sudokuSolver, "Hidden single", numberPositions.getFirst(), numberValue));
                 sudokuSolver.updatePosition(numberPositions.getFirst(), numberValue);
                 detectedChange = true;
             }
@@ -76,7 +74,7 @@ public class HiddenSingleAndPointingGroupsCheck extends SudokuPositionGroupAlgor
                     .filter(pos -> !numberPositions.contains(pos))
                     .map(pos -> {
                         if (sudokuSolver.getPossibleNumbersByPosition(pos).contains(numberValue)) {
-                            log.info(buildLog(sudokuSolver, "Pointing Group", pos, numberValue));
+                            log.info(SudokuUtils.buildLog(sudokuSolver, "Pointing Group", pos, numberValue));
                         }
                         return sudokuSolver.removeFromPosition(pos, numberValue);
                     })

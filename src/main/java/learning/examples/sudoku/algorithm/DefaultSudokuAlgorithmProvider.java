@@ -1,4 +1,4 @@
-package learning.sudoku.algorithm;
+package learning.examples.sudoku.algorithm;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

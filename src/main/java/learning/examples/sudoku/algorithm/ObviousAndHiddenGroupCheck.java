@@ -1,7 +1,7 @@
-package learning.sudoku.algorithm;
+package learning.examples.sudoku.algorithm;
 
-import learning.sudoku.SudokuSolver;
-import learning.sudoku.SudokuUtils;
+import learning.examples.sudoku.SudokuSolver;
+import learning.examples.sudoku.SudokuUtils;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,9 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static learning.sudoku.SudokuUtils.buildLog;
-import static learning.sudoku.SudokuUtils.haveIntersection;
 
 @Slf4j
 @NoArgsConstructor
@@ -64,8 +61,8 @@ public class ObviousAndHiddenGroupCheck extends SudokuPositionGroupAlgorithm {
             // update hidden/obvious groups positions with hidden group values
             for (Integer positionOfHiddenGroup : positionsOfHiddenGroup) {
 
-                if (haveIntersection(sudokuSolver.getPossibleNumbersByPosition(positionOfHiddenGroup), hiddenGroup)) {
-                    log.info(buildLog(sudokuSolver, "Group Override", positionOfHiddenGroup, hiddenGroup));
+                if (SudokuUtils.haveIntersection(sudokuSolver.getPossibleNumbersByPosition(positionOfHiddenGroup), hiddenGroup)) {
+                    log.info(SudokuUtils.buildLog(sudokuSolver, "Group Override", positionOfHiddenGroup, hiddenGroup));
                 }
 
                 detectedChange = sudokuSolver.updatePosition(positionOfHiddenGroup, new ArrayList<>(hiddenGroup)) || detectedChange;
@@ -75,8 +72,8 @@ public class ObviousAndHiddenGroupCheck extends SudokuPositionGroupAlgorithm {
             for (Integer pos : possibleNumbersByPos.keySet()) {
                 if (!positionsOfHiddenGroup.contains(pos)) {
 
-                    if (haveIntersection(sudokuSolver.getPossibleNumbersByPosition(pos), hiddenGroup)) {
-                        log.info(buildLog(sudokuSolver, "Group Remove", pos, hiddenGroup));
+                    if (SudokuUtils.haveIntersection(sudokuSolver.getPossibleNumbersByPosition(pos), hiddenGroup)) {
+                        log.info(SudokuUtils.buildLog(sudokuSolver, "Group Remove", pos, hiddenGroup));
                     }
 
                     detectedChange = sudokuSolver.removeFromPosition(pos, hiddenGroup) || detectedChange;

@@ -1,4 +1,4 @@
-package learning.sudoku;
+package learning.examples.sudoku;
 
 import lombok.extern.slf4j.Slf4j;
 

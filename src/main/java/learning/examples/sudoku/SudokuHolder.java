@@ -1,4 +1,4 @@
-package learning.sudoku;
+package learning.examples.sudoku;
 
 import additional.Pair;
 import lombok.Getter;
@@ -114,7 +114,7 @@ public class SudokuHolder {
                 )
                 .flatMap(Collection::stream)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public Place isSamePlacePositions(List<Integer> positions) {

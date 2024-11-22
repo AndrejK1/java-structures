@@ -1,14 +1,13 @@
-package learning.sudoku.algorithm;
+package learning.examples.sudoku.algorithm;
 
-import learning.sudoku.EmptyPositionNoteException;
-import learning.sudoku.SudokuSolver;
+import learning.examples.sudoku.EmptyPositionNoteException;
+import learning.examples.sudoku.SudokuSolver;
+import learning.examples.sudoku.SudokuUtils;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static learning.sudoku.SudokuUtils.buildLog;
 
 
 /**
@@ -52,7 +51,7 @@ public class RecursiveGuesser implements SudokuAlgorithm {
 
         for (Integer possibleNumber : possibleNumbers) {
             try {
-                log.info(buildLog(sudokuSolver, "Guessing", position, possibleNumber));
+                log.info(SudokuUtils.buildLog(sudokuSolver, "Guessing", position, possibleNumber));
                 sudokuSolver.updatePosition(position, possibleNumber);
 
                 if (guessNextUnsolvedPos(sudokuSolver)) {
@@ -61,12 +60,12 @@ public class RecursiveGuesser implements SudokuAlgorithm {
 
                 sudokuSolver.rewriteState(state);
             } catch (EmptyPositionNoteException ignore) {
-                log.info(buildLog(sudokuSolver, "Guessing Rollback", position, possibleNumber));
+                log.info(SudokuUtils.buildLog(sudokuSolver, "Guessing Rollback", position, possibleNumber));
                 sudokuSolver.rewriteState(state);
             }
         }
 
-        log.info(buildLog(sudokuSolver, "Guessing Complete Rollback", position, possibleNumbers));
+        log.info(SudokuUtils.buildLog(sudokuSolver, "Guessing Complete Rollback", position, possibleNumbers));
         sudokuSolver.rewriteState(state);
         return false;
     }

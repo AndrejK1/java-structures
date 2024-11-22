@@ -1,7 +1,7 @@
-package learning.sudoku;
+package learning.examples.sudoku;
 
-import learning.sudoku.algorithm.DefaultSudokuAlgorithmProvider;
-import learning.sudoku.algorithm.SudokuAlgorithm;
+import learning.examples.sudoku.algorithm.DefaultSudokuAlgorithmProvider;
+import learning.examples.sudoku.algorithm.SudokuAlgorithm;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
