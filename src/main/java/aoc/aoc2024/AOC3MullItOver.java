@@ -2,14 +2,12 @@ package aoc.aoc2024;
 
 import additional.Pair;
 import aoc.AOCTask;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Slf4j
 public class AOC3MullItOver implements AOCTask<AOC3MullItOver.AOC3InputData> {
 
     @Override

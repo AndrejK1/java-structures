@@ -2,7 +2,6 @@ package aoc.aoc2024;
 
 import additional.Pair;
 import aoc.AOCTask;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,12 +9,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BinaryOperator;
 
-@Slf4j
 public class AOC7BridgeRepair implements AOCTask<AOC7BridgeRepair.AOC7InputData> {
 
-    private static final Map<String, BinaryOperator<Long>> OPERATORS_V1 = Map.of("+", Long::sum, "*", (l, l2) -> l * l2);
+    private static final Map<String, BinaryOperator<Long>> OPERATORS_V1 = Map.of(
+            "+", Long::sum,
+            "*", (l, l2) -> l * l2
+    );
 
-    private static final Map<String, BinaryOperator<Long>> OPERATORS_V2 = Map.of("+", Long::sum, "*", (l, l2) -> l * l2, "|", (l, l2) -> l * (long) Math.pow(10, String.valueOf(l2).length()) + l2);
+    private static final Map<String, BinaryOperator<Long>> OPERATORS_V2 = Map.of(
+            "+", Long::sum,
+            "*", (l, l2) -> l * l2,
+            "|", (l, l2) -> l * (long) Math.pow(10, String.valueOf(l2).length()) + l2
+    );
 
     @Override
     public String getTaskTitle() {

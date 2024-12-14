@@ -2,14 +2,12 @@ package aoc.aoc2024;
 
 import additional.Pair;
 import aoc.AOCTask;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Slf4j
 public class AOC4CeresSearch implements AOCTask<AOC4CeresSearch.AOC4InputData> {
 
     private static final char[] XMAS = {'X', 'M', 'A', 'S'};

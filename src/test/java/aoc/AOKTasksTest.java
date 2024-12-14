@@ -1,5 +1,6 @@
 package aoc;
 
+import aoc.aoc2024.AOC10HoofIt;
 import aoc.aoc2024.AOC1HistorianHysteria;
 import aoc.aoc2024.AOC2RedNosedReports;
 import aoc.aoc2024.AOC3MullItOver;
@@ -132,6 +133,30 @@ class AOKTasksTest {
 
         Assertions.assertEquals(6334655979668L, aocAnswer.answerPart1());
         Assertions.assertEquals(6349492251099L, aocAnswer.answerPart2());
+    }
+
+    @Test
+    void testDay10TaskTest() {
+        AOCTask.AOCAnswer aocAnswer = AOCTaskRunner.builder()
+                .aokTask(new AOC10HoofIt())
+                .inputDataFile("aoc/2024/aoc10test.txt")
+                .build()
+                .solveTask();
+
+        Assertions.assertEquals(36L, aocAnswer.answerPart1());
+        Assertions.assertEquals(0L, aocAnswer.answerPart2());
+    }
+
+    @Test
+    void testDay10Task() {
+        AOCTask.AOCAnswer aocAnswer = AOCTaskRunner.builder()
+                .aokTask(new AOC10HoofIt())
+                .inputDataFile("aoc/2024/aoc10.txt")
+                .build()
+                .solveTask();
+
+        Assertions.assertEquals(841L, aocAnswer.answerPart1());
+        Assertions.assertEquals(0L, aocAnswer.answerPart2());
     }
 
 }

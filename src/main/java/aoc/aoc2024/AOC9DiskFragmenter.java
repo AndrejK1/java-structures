@@ -1,7 +1,6 @@
 package aoc.aoc2024;
 
 import aoc.AOCTask;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 public class AOC9DiskFragmenter implements AOCTask<AOC9DiskFragmenter.AOC9InputData> {
 
     @Override

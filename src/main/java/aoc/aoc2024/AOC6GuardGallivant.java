@@ -1,23 +1,19 @@
 package aoc.aoc2024;
 
 import aoc.AOCTask;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static aoc.aoc2024.AOC6GuardGallivant.GuardGallivantUtils.UP;
-import static aoc.aoc2024.AOC6GuardGallivant.GuardGallivantUtils.calcNewPosition;
-import static aoc.aoc2024.AOC6GuardGallivant.GuardGallivantUtils.getCoordsFromPosition;
-import static aoc.aoc2024.AOC6GuardGallivant.GuardGallivantUtils.getNextDirection;
-import static aoc.aoc2024.AOC6GuardGallivant.GuardGallivantUtils.getPositionFromCoords;
-import static aoc.aoc2024.AOC6GuardGallivant.GuardGallivantUtils.isOutsideOfField;
+import static aoc.AOCMatrixUtils.DIRECTIONS;
+import static aoc.AOCMatrixUtils.UP_DIRECTION;
+import static aoc.AOCMatrixUtils.calcNewPosition;
+import static aoc.AOCMatrixUtils.getCoordsFromPosition;
+import static aoc.AOCMatrixUtils.getPositionFromCoords;
+import static aoc.AOCMatrixUtils.isOutsideOfField;
 
-@Slf4j
 public class AOC6GuardGallivant implements AOCTask<AOC6GuardGallivant.AOC6InputData> {
 
     @Override
@@ -32,17 +28,17 @@ public class AOC6GuardGallivant implements AOCTask<AOC6GuardGallivant.AOC6InputD
         Set<Integer> wallPositions = inputData.wallPositions();
 
         int[] guardCoords = getCoordsFromPosition(inputData.guardPosition(), fieldWidth);
-        int[] currentDirection = UP;
+        int[] currentDirection = UP_DIRECTION;
 
         Set<Integer> guardUniquePositions = new HashSet<>();
         int possibleCircles = 0;
 
-        while (!isOutsideOfField(guardCoords, fieldWidth, fieldHeight)) {
+        while (!isOutsideOfField(guardCoords[0], guardCoords[1], fieldWidth, fieldHeight)) {
             guardUniquePositions.add(getPositionFromCoords(guardCoords, fieldWidth));
 
             int[] nextPositionCoords = calcNewPosition(guardCoords, currentDirection);
 
-            if (isOutsideOfField(nextPositionCoords, fieldWidth, fieldHeight)) {
+            if (isOutsideOfField(nextPositionCoords[0], nextPositionCoords[1], fieldWidth, fieldHeight)) {
                 break;
             }
 
@@ -61,13 +57,13 @@ public class AOC6GuardGallivant implements AOCTask<AOC6GuardGallivant.AOC6InputD
             }
 
             guardCoords = getCoordsFromPosition(inputData.guardPosition(), fieldWidth);
-            currentDirection = UP;
+            currentDirection = UP_DIRECTION;
 
             Map<Integer, int[]> guardUniquePositionsInCircle = new HashMap<>();
 
             wallPositions.add(guardUniquePosition);
 
-            while (!isOutsideOfField(guardCoords, fieldWidth, fieldHeight)) {
+            while (!isOutsideOfField(guardCoords[0], guardCoords[1], fieldWidth, fieldHeight)) {
                 int guardPosition = getPositionFromCoords(guardCoords, fieldWidth);
 
                 if (currentDirection == guardUniquePositionsInCircle.get(guardPosition)) {
@@ -79,7 +75,7 @@ public class AOC6GuardGallivant implements AOCTask<AOC6GuardGallivant.AOC6InputD
 
                 int[] nextPositionCoords = calcNewPosition(guardCoords, currentDirection);
 
-                if (isOutsideOfField(nextPositionCoords, fieldWidth, fieldHeight)) {
+                if (isOutsideOfField(nextPositionCoords[0], nextPositionCoords[1], fieldWidth, fieldHeight)) {
                     break;
                 }
 
@@ -128,42 +124,13 @@ public class AOC6GuardGallivant implements AOCTask<AOC6GuardGallivant.AOC6InputD
         );
     }
 
+    private int[] getNextDirection(int[] current) {
+        return DIRECTIONS.get((DIRECTIONS.indexOf(current) + 1) % DIRECTIONS.size());
+    }
+
     public record AOC6InputData(int fieldWidth,
                                 int fieldHeight,
                                 Set<Integer> wallPositions,
                                 int guardPosition) implements AOCInputData {
-    }
-
-    @UtilityClass
-    static final class GuardGallivantUtils {
-        static final int[] UP = new int[]{-1, 0};
-        static final int[] DOWN = new int[]{1, 0};
-        static final int[] LEFT = new int[]{0, -1};
-        static final int[] RIGHT = new int[]{0, 1};
-        static final List<int[]> DIRECTION_ORDER = List.of(UP, RIGHT, DOWN, LEFT);
-
-        static boolean isOutsideOfField(int[] coords, int fieldWidth, int fieldHeight) {
-            return coords[0] < 0 || coords[0] >= fieldWidth || coords[1] < 0 || coords[1] >= fieldHeight;
-        }
-
-        static int[] calcNewPosition(int[] coords, int[] direction) {
-            return new int[]{coords[0] + direction[0], coords[1] + direction[1]};
-        }
-
-        static int[] getNextDirection(int[] current) {
-            return DIRECTION_ORDER.get((DIRECTION_ORDER.indexOf(current) + 1) % DIRECTION_ORDER.size());
-        }
-
-        static int[] getCoordsFromPosition(int position, int fieldWidth) {
-            return new int[]{position / fieldWidth, position % fieldWidth};
-        }
-
-        static int getPositionFromCoords(int[] coords, int fieldWidth) {
-            return getPositionFromCoords(coords[0], coords[1], fieldWidth);
-        }
-
-        static int getPositionFromCoords(int row, int column, int fieldWidth) {
-            return row * fieldWidth + column;
-        }
     }
 }

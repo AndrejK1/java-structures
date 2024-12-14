@@ -1,8 +1,6 @@
 package aoc.aoc2024;
 
 import aoc.AOCTask;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,11 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static aoc.aoc2024.AOC8ResonantCollinearity.ResonantCollinearityUtils.getCoordsFromPosition;
-import static aoc.aoc2024.AOC8ResonantCollinearity.ResonantCollinearityUtils.getPositionFromCoords;
-import static aoc.aoc2024.AOC8ResonantCollinearity.ResonantCollinearityUtils.isOnField;
+import static aoc.AOCMatrixUtils.getCoordsFromPosition;
+import static aoc.AOCMatrixUtils.getPositionFromCoords;
+import static aoc.AOCMatrixUtils.isOnField;
 
-@Slf4j
 public class AOC8ResonantCollinearity implements AOCTask<AOC8ResonantCollinearity.AOC8InputData> {
 
     @Override
@@ -47,7 +44,7 @@ public class AOC8ResonantCollinearity implements AOCTask<AOC8ResonantCollinearit
                         int possiblePlaceRow = antenna2Coords[0] + diff[0] * gridPosition;
                         int possiblePlaceColumn = antenna2Coords[1] + diff[1] * gridPosition;
 
-                        if (!isOnField(possiblePlaceRow, possiblePlaceColumn, inputData)) {
+                        if (!isOnField(possiblePlaceRow, possiblePlaceColumn, inputData.fieldWidth(), inputData.fieldHeight())) {
                             break;
                         }
 
@@ -108,22 +105,6 @@ public class AOC8ResonantCollinearity implements AOCTask<AOC8ResonantCollinearit
                 fieldWidth,
                 rows.length,
                 antennaPositionsByType);
-    }
-
-    @UtilityClass
-    static final class ResonantCollinearityUtils {
-
-        static boolean isOnField(int i, int j, AOC8InputData inputData) {
-            return i >= 0 && i < inputData.fieldWidth() && j >= 0 && j < inputData.fieldHeight();
-        }
-
-        static int getPositionFromCoords(int row, int column, int fieldWidth) {
-            return row * fieldWidth + column;
-        }
-
-        static int[] getCoordsFromPosition(int position, int fieldWidth) {
-            return new int[]{position / fieldWidth, position % fieldWidth};
-        }
     }
 
     public record AOC8InputData(int fieldWidth, int fieldHeight,
