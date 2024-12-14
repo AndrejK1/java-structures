@@ -144,7 +144,7 @@ class AOKTasksTest {
                 .solveTask();
 
         Assertions.assertEquals(36L, aocAnswer.answerPart1());
-        Assertions.assertEquals(0L, aocAnswer.answerPart2());
+        Assertions.assertEquals(81L, aocAnswer.answerPart2());
     }
 
     @Test
@@ -156,7 +156,7 @@ class AOKTasksTest {
                 .solveTask();
 
         Assertions.assertEquals(841L, aocAnswer.answerPart1());
-        Assertions.assertEquals(0L, aocAnswer.answerPart2());
+        Assertions.assertEquals(1875L, aocAnswer.answerPart2());
     }
 
 }

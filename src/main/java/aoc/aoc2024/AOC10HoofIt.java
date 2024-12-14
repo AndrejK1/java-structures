@@ -23,23 +23,27 @@ public class AOC10HoofIt implements AOCTask<AOC10HoofIt.AOC10InputData> {
     @Override
     public AOCAnswer solve(AOC10InputData inputData) {
         long result1 = 0;
+        long result2 = 0;
 
         for (Integer zeroPosition : inputData.zeroPositions()) {
-            result1 += countHikingTrails(zeroPosition, inputData);
+            List<Integer> reachedPeakPositions = countHikingTrails(zeroPosition, inputData);
+
+            result1 += new HashSet<>(reachedPeakPositions).size();
+            result2 += reachedPeakPositions.size();
         }
 
-        return new AOCAnswer(result1, 0);
+        return new AOCAnswer(result1, result2);
     }
 
-    private int countHikingTrails(Integer zeroPosition, AOC10InputData inputData) {
-        Set<Integer> reachedPeaks = new HashSet<>();
+    private List<Integer> countHikingTrails(Integer zeroPosition, AOC10InputData inputData) {
+        List<Integer> reachedPeaks = new ArrayList<>();
         backTrackHikingTrails(0, zeroPosition, reachedPeaks, inputData);
-        return reachedPeaks.size();
+        return reachedPeaks;
     }
 
     private void backTrackHikingTrails(Integer currentNumber,
                                        Integer currentPosition,
-                                       Set<Integer> reachedPeaks,
+                                       List<Integer> reachedPeaks,
                                        AOC10InputData inputData) {
         if (currentNumber == 9) {
             reachedPeaks.add(currentPosition);
@@ -63,7 +67,6 @@ public class AOC10HoofIt implements AOCTask<AOC10HoofIt.AOC10InputData> {
                 .filter(p -> inputData.field().get(p).equals(currentNumber))
                 .toList();
     }
-
 
     @Override
     public AOC10InputData parseInputData(String fileContent) {
