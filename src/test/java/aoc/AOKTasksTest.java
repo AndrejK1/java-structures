@@ -8,6 +8,7 @@ import aoc.aoc2024.AOC5PrintQueue;
 import aoc.aoc2024.AOC6GuardGallivant;
 import aoc.aoc2024.AOC7BridgeRepair;
 import aoc.aoc2024.AOC8ResonantCollinearity;
+import aoc.aoc2024.AOC9DiskFragmenter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -107,6 +108,30 @@ class AOKTasksTest {
 
         Assertions.assertEquals(222L, aocAnswer.answerPart1());
         Assertions.assertEquals(884L, aocAnswer.answerPart2());
+    }
+
+    @Test
+    void testDay9TaskTest() {
+        AOCTask.AOCAnswer aocAnswer = AOCTaskRunner.builder()
+                .aokTask(new AOC9DiskFragmenter())
+                .inputDataFile("aoc/2024/aoc9test.txt")
+                .build()
+                .solveTask();
+
+        Assertions.assertEquals(1928L, aocAnswer.answerPart1());
+        Assertions.assertEquals(0, aocAnswer.answerPart2());
+    }
+
+    @Test
+    void testDay9Task() {
+        AOCTask.AOCAnswer aocAnswer = AOCTaskRunner.builder()
+                .aokTask(new AOC9DiskFragmenter())
+                .inputDataFile("aoc/2024/aoc9.txt")
+                .build()
+                .solveTask();
+
+        Assertions.assertEquals(6334655979668L, aocAnswer.answerPart1());
+        Assertions.assertEquals(0, aocAnswer.answerPart2());
     }
 
 }
