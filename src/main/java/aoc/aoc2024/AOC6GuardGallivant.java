@@ -18,7 +18,7 @@ import static aoc.aoc2024.AOC6GuardGallivant.GuardGallivantUtils.getPositionFrom
 import static aoc.aoc2024.AOC6GuardGallivant.GuardGallivantUtils.isOutsideOfField;
 
 @Slf4j
-public class AOC6GuardGallivant extends AOCTask<AOC6GuardGallivant.AOC6InputData> {
+public class AOC6GuardGallivant implements AOCTask<AOC6GuardGallivant.AOC6InputData> {
 
     @Override
     public String getTaskTitle() {
@@ -50,10 +50,9 @@ public class AOC6GuardGallivant extends AOCTask<AOC6GuardGallivant.AOC6InputData
 
             if (wallPositions.contains(nextPosition)) {
                 currentDirection = getNextDirection(currentDirection);
-                continue;
+            } else {
+                guardCoords = nextPositionCoords;
             }
-
-            guardCoords = nextPositionCoords;
         }
 
         for (Integer guardUniquePosition : guardUniquePositions) {
@@ -100,7 +99,7 @@ public class AOC6GuardGallivant extends AOCTask<AOC6GuardGallivant.AOC6InputData
     }
 
     @Override
-    protected AOC6InputData parseInputData(String fileContent) {
+    public AOC6InputData parseInputData(String fileContent) {
         Set<Integer> wallPositions = new HashSet<>();
         int guardPosition = -1;
 

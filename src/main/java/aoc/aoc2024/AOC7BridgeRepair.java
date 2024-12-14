@@ -11,18 +11,11 @@ import java.util.Map;
 import java.util.function.BinaryOperator;
 
 @Slf4j
-public class AOC7BridgeRepair extends AOCTask<AOC7BridgeRepair.AOC7InputData> {
+public class AOC7BridgeRepair implements AOCTask<AOC7BridgeRepair.AOC7InputData> {
 
-    private static final Map<String, BinaryOperator<Long>> OPERATORS_V1 = Map.of(
-            "+", Long::sum,
-            "*", (l, l2) -> l * l2
-    );
+    private static final Map<String, BinaryOperator<Long>> OPERATORS_V1 = Map.of("+", Long::sum, "*", (l, l2) -> l * l2);
 
-    private static final Map<String, BinaryOperator<Long>> OPERATORS_V2 = Map.of(
-            "+", Long::sum,
-            "*", (l, l2) -> l * l2,
-            "|", (l, l2) -> l * (long) Math.pow(10, String.valueOf(l2).length()) + l2
-    );
+    private static final Map<String, BinaryOperator<Long>> OPERATORS_V2 = Map.of("+", Long::sum, "*", (l, l2) -> l * l2, "|", (l, l2) -> l * (long) Math.pow(10, String.valueOf(l2).length()) + l2);
 
     @Override
     public String getTaskTitle() {
@@ -35,13 +28,13 @@ public class AOC7BridgeRepair extends AOCTask<AOC7BridgeRepair.AOC7InputData> {
         long possibleEquationsV2 = 0;
 
         for (Pair<Long, List<Long>> equation : inputData.equations()) {
-            if (isEquationSolvable(equation.getKey(), equation.getValue(), OPERATORS_V1)) {
+            if (checkEquationSolutionExistence(equation.getKey(), equation.getValue(), OPERATORS_V1)) {
                 possibleEquations += equation.getKey();
             }
         }
 
         for (Pair<Long, List<Long>> equation : inputData.equations()) {
-            if (isEquationSolvable(equation.getKey(), equation.getValue(), OPERATORS_V2)) {
+            if (checkEquationSolutionExistence(equation.getKey(), equation.getValue(), OPERATORS_V2)) {
                 possibleEquationsV2 += equation.getKey();
             }
         }
@@ -49,13 +42,14 @@ public class AOC7BridgeRepair extends AOCTask<AOC7BridgeRepair.AOC7InputData> {
         return new AOCAnswer(possibleEquations, possibleEquationsV2);
     }
 
-    private boolean isEquationSolvable(long equationResult, List<Long> equationOperands, Map<String, BinaryOperator<Long>> operators) {
-        return backTrack(equationResult, equationOperands, operators, 0, 0);
+    private boolean checkEquationSolutionExistence(long equationResult, List<Long> equationOperands,
+                                                   Map<String, BinaryOperator<Long>> operators) {
+        return checkEquationSolutionExistenceBackTrack(equationResult, equationOperands, operators, 0, 0);
     }
 
-    private boolean backTrack(long equationResult, List<Long> equationOperands,
-                              Map<String, BinaryOperator<Long>> operators,
-                              int idx, long currentSum) {
+    private boolean checkEquationSolutionExistenceBackTrack(long equationResult, List<Long> equationOperands,
+                                                            Map<String, BinaryOperator<Long>> operators,
+                                                            int idx, long currentSum) {
         if (currentSum == equationResult && idx == equationOperands.size()) {
             return true;
         }
@@ -68,9 +62,7 @@ public class AOC7BridgeRepair extends AOCTask<AOC7BridgeRepair.AOC7InputData> {
 
         for (Map.Entry<String, BinaryOperator<Long>> operator : operators.entrySet()) {
             if (!foundSolution && !(operator.getKey().equals("*") && idx == 0)) {
-                foundSolution = backTrack(equationResult, equationOperands, operators, idx + 1,
-                        operator.getValue().apply(currentSum, equationOperands.get(idx))
-                );
+                foundSolution = checkEquationSolutionExistenceBackTrack(equationResult, equationOperands, operators, idx + 1, operator.getValue().apply(currentSum, equationOperands.get(idx)));
             }
         }
 
@@ -78,7 +70,7 @@ public class AOC7BridgeRepair extends AOCTask<AOC7BridgeRepair.AOC7InputData> {
     }
 
     @Override
-    protected AOC7InputData parseInputData(String fileContent) {
+    public AOC7InputData parseInputData(String fileContent) {
         List<Pair<Long, List<Long>>> equations = new ArrayList<>();
 
         for (String equation : fileContent.split("\n")) {

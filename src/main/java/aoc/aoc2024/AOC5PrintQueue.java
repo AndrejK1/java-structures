@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class AOC5PrintQueue extends AOCTask<AOC5PrintQueue.AOC5InputData> {
+public class AOC5PrintQueue implements AOCTask<AOC5PrintQueue.AOC5InputData> {
 
     @Override
     public String getTaskTitle() {
@@ -61,7 +61,7 @@ public class AOC5PrintQueue extends AOCTask<AOC5PrintQueue.AOC5InputData> {
         return new AOCAnswer(correctlyOrderedUpdatesMiddleSum, fixedOrderedUpdatesMiddleSum);
     }
 
-    private static List<Integer> fixUpdate(List<Integer> update, Map<Integer, Set<Integer>> rulesByNumber) {
+    private List<Integer> fixUpdate(List<Integer> update, Map<Integer, Set<Integer>> rulesByNumber) {
         update.sort((num, num2) -> {
             if (rulesByNumber.get(num).contains(num2)) {
                 return -1;
@@ -77,7 +77,7 @@ public class AOC5PrintQueue extends AOCTask<AOC5PrintQueue.AOC5InputData> {
     }
 
     @Override
-    protected AOC5InputData parseInputData(String fileContent) {
+    public AOC5InputData parseInputData(String fileContent) {
         String[] dataParts = fileContent.split("\n\n");
         String[] pageRulesStrArray = dataParts[0].split("\n");
         String[] pageUpdatesStrArray = dataParts[1].split("\n");

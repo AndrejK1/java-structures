@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-public class AOC4CeresSearch extends AOCTask<AOC4CeresSearch.AOC4InputData> {
+public class AOC4CeresSearch implements AOCTask<AOC4CeresSearch.AOC4InputData> {
 
     private static final char[] XMAS = {'X', 'M', 'A', 'S'};
 
@@ -29,7 +29,7 @@ public class AOC4CeresSearch extends AOCTask<AOC4CeresSearch.AOC4InputData> {
         int xmasWordsCount = 0;
 
         for (Pair<Integer, Integer> wordStartCoords : xCoords) {
-            straitWordsCount += countWordsFromPosition(matrix, wordStartCoords.getKey(), wordStartCoords.getValue());
+            straitWordsCount += countStraitWordsFromPosition(matrix, wordStartCoords.getKey(), wordStartCoords.getValue());
         }
 
         for (Pair<Integer, Integer> wordStartCoords : aCoords) {
@@ -42,47 +42,47 @@ public class AOC4CeresSearch extends AOCTask<AOC4CeresSearch.AOC4InputData> {
         );
     }
 
-    private static int countWordsFromPosition(char[][] matrix, int line, int column) {
+    private int countStraitWordsFromPosition(char[][] matrix, int line, int column) {
         int result = 0;
         int matrixRows = matrix.length;
         int matrixColumns = matrix[0].length;
 
         if (line >= 3) {
-            result += countWord(matrix, generateWordCoordinates(line, column, -1, 0));
+            result += countStraitWord(matrix, generateStraitWordCoordinates(line, column, -1, 0));
 
             if (column >= 3) {
-                result += countWord(matrix, generateWordCoordinates(line, column, -1, -1));
+                result += countStraitWord(matrix, generateStraitWordCoordinates(line, column, -1, -1));
             }
 
             if (column + 3 < matrixColumns) {
-                result += countWord(matrix, generateWordCoordinates(line, column, -1, 1));
+                result += countStraitWord(matrix, generateStraitWordCoordinates(line, column, -1, 1));
             }
         }
 
         if (column >= 3) {
-            result += countWord(matrix, generateWordCoordinates(line, column, 0, -1));
+            result += countStraitWord(matrix, generateStraitWordCoordinates(line, column, 0, -1));
         }
 
         if (column + 3 < matrixColumns) {
-            result += countWord(matrix, generateWordCoordinates(line, column, 0, 1));
+            result += countStraitWord(matrix, generateStraitWordCoordinates(line, column, 0, 1));
         }
 
         if (line + 3 < matrixRows) {
-            result += countWord(matrix, generateWordCoordinates(line, column, 1, 0));
+            result += countStraitWord(matrix, generateStraitWordCoordinates(line, column, 1, 0));
 
             if (column >= 3) {
-                result += countWord(matrix, generateWordCoordinates(line, column, 1, -1));
+                result += countStraitWord(matrix, generateStraitWordCoordinates(line, column, 1, -1));
             }
 
             if (column + 3 < matrixColumns) {
-                result += countWord(matrix, generateWordCoordinates(line, column, 1, 1));
+                result += countStraitWord(matrix, generateStraitWordCoordinates(line, column, 1, 1));
             }
         }
 
         return result;
     }
 
-    private static int[][] generateWordCoordinates(int line, int column, int vDirection, int hDirection) {
+    private int[][] generateStraitWordCoordinates(int line, int column, int vDirection, int hDirection) {
         int[][] wordCoords = new int[XMAS.length][2];
 
         for (int i = 0; i < XMAS.length; i++) {
@@ -93,7 +93,7 @@ public class AOC4CeresSearch extends AOCTask<AOC4CeresSearch.AOC4InputData> {
         return wordCoords;
     }
 
-    private static int countWord(char[][] matrix, int[][] coords) {
+    private int countStraitWord(char[][] matrix, int[][] coords) {
         for (int i = 0; i < coords.length; i++) {
             if (matrix[coords[i][0]][coords[i][1]] != XMAS[i]) {
                 return 0;
@@ -102,7 +102,7 @@ public class AOC4CeresSearch extends AOCTask<AOC4CeresSearch.AOC4InputData> {
         return 1;
     }
 
-    private static int countXmasWordsFromPosition(char[][] matrix, int line, int column) {
+    private int countXmasWordsFromPosition(char[][] matrix, int line, int column) {
         int matrixRows = matrix.length;
         int matrixColumns = matrix[0].length;
 
@@ -123,7 +123,7 @@ public class AOC4CeresSearch extends AOCTask<AOC4CeresSearch.AOC4InputData> {
     }
 
     @Override
-    protected AOC4InputData parseInputData(String fileContent) {
+    public AOC4InputData parseInputData(String fileContent) {
         String[] linesCount = fileContent.split("\n");
         int lineLength = linesCount[0].length();
 

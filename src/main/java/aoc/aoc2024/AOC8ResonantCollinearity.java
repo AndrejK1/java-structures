@@ -16,7 +16,7 @@ import static aoc.aoc2024.AOC8ResonantCollinearity.ResonantCollinearityUtils.get
 import static aoc.aoc2024.AOC8ResonantCollinearity.ResonantCollinearityUtils.isOnField;
 
 @Slf4j
-public class AOC8ResonantCollinearity extends AOCTask<AOC8ResonantCollinearity.AOC8InputData> {
+public class AOC8ResonantCollinearity implements AOCTask<AOC8ResonantCollinearity.AOC8InputData> {
 
     @Override
     public String getTaskTitle() {
@@ -77,7 +77,7 @@ public class AOC8ResonantCollinearity extends AOCTask<AOC8ResonantCollinearity.A
     }
 
     @Override
-    protected AOC8InputData parseInputData(String fileContent) {
+    public AOC8InputData parseInputData(String fileContent) {
         Map<Character, List<Integer>> antennaPositionsByType = new HashMap<>();
 
         String[] rows = fileContent.split("\n");

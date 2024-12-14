@@ -1,19 +1,16 @@
 package aoc;
 
-import lombok.extern.slf4j.Slf4j;
+public interface AOCTask<I extends AOCTask.AOCInputData> {
 
-@Slf4j
-public abstract class AOCTask<I extends AOCTask.AOCInputData> {
+    String getTaskTitle();
 
-    public abstract String getTaskTitle();
+    AOCAnswer solve(I inputData);
 
-    public abstract AOCAnswer solve(I inputData);
+    I parseInputData(String fileContent);
 
-    protected abstract I parseInputData(String fileContent);
-
-    protected interface AOCInputData {
+    interface AOCInputData {
     }
 
-    public record AOCAnswer(long answerPart1, long answerPart2) {
+    record AOCAnswer(long answerPart1, long answerPart2) {
     }
 }

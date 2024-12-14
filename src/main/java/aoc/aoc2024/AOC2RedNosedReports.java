@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class AOC2RedNosedReports extends AOCTask<AOC2RedNosedReports.AOC2InputData> {
+public class AOC2RedNosedReports implements AOCTask<AOC2RedNosedReports.AOC2InputData> {
 
     @Override
     public String getTaskTitle() {
@@ -20,16 +20,11 @@ public class AOC2RedNosedReports extends AOCTask<AOC2RedNosedReports.AOC2InputDa
         int safeReports = 0;
 
         for (List<Integer> report : reports) {
-
-            boolean correctReport = isReportCorrect(report);
-
-            if (!correctReport) {
-                correctReport = checkForOneErrorReport(report);
-            } else {
+            if (isReportCorrect(report)) {
                 safeWithoutErrors++;
             }
 
-            if (correctReport) {
+            if (hasOneError(report)) {
                 safeReports++;
             }
         }
@@ -37,7 +32,7 @@ public class AOC2RedNosedReports extends AOCTask<AOC2RedNosedReports.AOC2InputDa
         return new AOCAnswer(safeWithoutErrors, safeReports);
     }
 
-    private static boolean checkForOneErrorReport(List<Integer> report) {
+    private boolean hasOneError(List<Integer> report) {
         for (int i = 0; i < report.size(); i++) {
             List<Integer> reportCopy = new ArrayList<>(report);
             reportCopy.remove(i);
@@ -52,7 +47,7 @@ public class AOC2RedNosedReports extends AOCTask<AOC2RedNosedReports.AOC2InputDa
         return false;
     }
 
-    private static boolean isReportCorrect(List<Integer> report) {
+    private boolean isReportCorrect(List<Integer> report) {
         int firstDiff = report.get(1) - report.get(0);
 
         if (firstDiff == 0) {

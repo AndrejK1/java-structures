@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AOC1HistorianHysteria extends AOCTask<AOC1HistorianHysteria.AOC1InputData> {
+public class AOC1HistorianHysteria implements AOCTask<AOC1HistorianHysteria.AOC1InputData> {
 
     @Override
     public String getTaskTitle() {

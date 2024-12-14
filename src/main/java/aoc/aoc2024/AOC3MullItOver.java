@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
-public class AOC3MullItOver extends AOCTask<AOC3MullItOver.AOC3InputData> {
+public class AOC3MullItOver implements AOCTask<AOC3MullItOver.AOC3InputData> {
 
     @Override
     public String getTaskTitle() {
@@ -25,7 +25,7 @@ public class AOC3MullItOver extends AOCTask<AOC3MullItOver.AOC3InputData> {
         return new AOCAnswer(result1, result2);
     }
 
-    private static int runMultiplicationOnData(List<Pair<Integer, Integer>> mulCalls) {
+    private int runMultiplicationOnData(List<Pair<Integer, Integer>> mulCalls) {
         int result = 0;
 
         for (Pair<Integer, Integer> pair : mulCalls) {
