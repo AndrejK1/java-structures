@@ -33,4 +33,6 @@ java.targetCompatibility = JavaVersion.VERSION_21
 
 test {
     useJUnitPlatform()
+    minHeapSize = "128m"
+    maxHeapSize = "8g"
 }

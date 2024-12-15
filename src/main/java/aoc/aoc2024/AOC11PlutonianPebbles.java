@@ -2,9 +2,12 @@ package aoc.aoc2024;
 
 import aoc.AOCTask;
 
-import java.util.ArrayList;
+import java.awt.*;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 public class AOC11PlutonianPebbles implements AOCTask<AOC11PlutonianPebbles.AOC11InputData> {
 
@@ -15,33 +18,42 @@ public class AOC11PlutonianPebbles implements AOCTask<AOC11PlutonianPebbles.AOC1
 
     @Override
     public AOCAnswer solve(AOC11InputData inputData) {
-        int result1 = blink(new ArrayList<>(inputData.stones()), 25).size();
-        int result2 = blink(new ArrayList<>(inputData.stones()), 75).size();
+        int result1 = blink(new LinkedList<>(inputData.stones()), 25).size();
+        int result2 = blink(new LinkedList<>(inputData.stones()), 75).size();
 
         return new AOCAnswer(result1, result2);
     }
 
-    private List<Long> blink(List<Long> stones, int times) {
+    private List<Long> blink(LinkedList<Long> stones, int times) {
         for (int i = 0; i < times; i++) {
-            for (int j = 0; j < stones.size(); j++) {
-                Long stone = stones.get(j);
+            long startTime = System.currentTimeMillis();
+
+            ListIterator<Long> listIterator = stones.listIterator();
+
+            while (listIterator.hasNext()) {
+                Long stone = listIterator.next();
 
                 if (stone == 0L) {
-                    stones.set(j, 1L);
+                    listIterator.set(1L);
                 } else if (((int) Math.log10(stone) + 1) % 2 == 0) {
                     int digitsCount = (int) Math.log10(stone) + 1;
                     int divider = (int) Math.pow(10, digitsCount / 2);
 
-                    stones.set(j, stone / divider);
-                    stones.add(j + 1, stone % divider);
-                    j++;
+                    listIterator.set(stone / divider);
+                    listIterator.add(stone % divider);
                 } else {
-                    stones.set(j, stone * 2024);
+                    listIterator.set(stone * 2024);
                 }
             }
+
+            logEnd(i, startTime, stones);
         }
 
         return stones;
+    }
+
+    private void logEnd(int i, long startTime, List<Long> stones) {
+        System.out.println("Iteration " + (1 + i) + ": " + (System.currentTimeMillis() - (double) startTime) / 1000 + "s - " + stones.size() + " el");
     }
 
     @Override
