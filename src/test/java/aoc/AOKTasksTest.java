@@ -169,7 +169,7 @@ class AOKTasksTest {
                 .solveTask();
 
         Assertions.assertEquals(55312L, aocAnswer.answerPart1());
-        Assertions.assertEquals(0L, aocAnswer.answerPart2());
+        Assertions.assertEquals(65601038650482L, aocAnswer.answerPart2());
     }
 
     @Test
@@ -181,7 +181,7 @@ class AOKTasksTest {
                 .solveTask();
 
         Assertions.assertEquals(194557L, aocAnswer.answerPart1());
-        Assertions.assertEquals(0L, aocAnswer.answerPart2());
+        Assertions.assertEquals(231532558973909L, aocAnswer.answerPart2());
     }
 
 }

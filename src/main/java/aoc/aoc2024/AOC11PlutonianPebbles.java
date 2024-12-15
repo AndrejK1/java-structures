@@ -2,11 +2,9 @@ package aoc.aoc2024;
 
 import aoc.AOCTask;
 
-import java.awt.*;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 public class AOC11PlutonianPebbles implements AOCTask<AOC11PlutonianPebbles.AOC11InputData> {
@@ -18,51 +16,73 @@ public class AOC11PlutonianPebbles implements AOCTask<AOC11PlutonianPebbles.AOC1
 
     @Override
     public AOCAnswer solve(AOC11InputData inputData) {
-        int result1 = blink(new LinkedList<>(inputData.stones()), 25).size();
-        int result2 = blink(new LinkedList<>(inputData.stones()), 75).size();
+        long result1 = blink(inputData.stones(), 25);
+        long result2 = blink(inputData.stones(), 75);
 
         return new AOCAnswer(result1, result2);
     }
 
-    private List<Long> blink(LinkedList<Long> stones, int times) {
-        for (int i = 0; i < times; i++) {
-            long startTime = System.currentTimeMillis();
-
-            ListIterator<Long> listIterator = stones.listIterator();
-
-            while (listIterator.hasNext()) {
-                Long stone = listIterator.next();
-
-                if (stone == 0L) {
-                    listIterator.set(1L);
-                } else if (((int) Math.log10(stone) + 1) % 2 == 0) {
-                    int digitsCount = (int) Math.log10(stone) + 1;
-                    int divider = (int) Math.pow(10, digitsCount / 2);
-
-                    listIterator.set(stone / divider);
-                    listIterator.add(stone % divider);
-                } else {
-                    listIterator.set(stone * 2024);
-                }
-            }
-
-            logEnd(i, startTime, stones);
+    private long blink(List<Integer> stones, int times) {
+        if (times <= 0) {
+            return stones.size();
         }
 
-        return stones;
+        Map<String, Long> memo = new HashMap<>();
+
+        long result = 0;
+
+        for (Integer stone : stones) {
+            result += calcStoneCount(stone, times - 1, memo);
+        }
+
+        return result;
     }
 
-    private void logEnd(int i, long startTime, List<Long> stones) {
-        System.out.println("Iteration " + (1 + i) + ": " + (System.currentTimeMillis() - (double) startTime) / 1000 + "s - " + stones.size() + " el");
+    private long calcStoneCount(long stone, int blinkLeft, Map<String, Long> memo) {
+        String key = stone + "." + blinkLeft;
+
+        if (memo.get(key) != null && memo.get(key) != 0) {
+            return memo.get(key);
+        }
+
+        if (blinkLeft == 0) {
+            memo.put(key, hasEvenDigitsCount(stone) ? 2L : 1L);
+            return memo.get(key);
+        }
+
+        long result;
+
+        if (stone == 0) {
+            result = calcStoneCount(1, blinkLeft - 1, memo);
+        } else if (hasEvenDigitsCount(stone)) {
+            int divider = (int) Math.pow(10, getDigitsCount(stone) / 2);
+
+            result = calcStoneCount(stone / divider, blinkLeft - 1, memo)
+                    + calcStoneCount(stone % divider, blinkLeft - 1, memo);
+        } else {
+            result = calcStoneCount(stone * 2024, blinkLeft - 1, memo);
+        }
+
+        memo.put(key, result);
+
+        return result;
+    }
+
+    private boolean hasEvenDigitsCount(long num) {
+        return getDigitsCount(num) % 2 == 0;
+    }
+
+    private static int getDigitsCount(long num) {
+        return (int) Math.log10(num) + 1;
     }
 
     @Override
     public AOC11InputData parseInputData(String fileContent) {
         return new AOC11InputData(
-                Arrays.stream(fileContent.split(" ")).map(Long::parseLong).toList()
+                Arrays.stream(fileContent.split(" ")).map(Integer::parseInt).toList()
         );
     }
 
-    public record AOC11InputData(List<Long> stones) implements AOCInputData {
+    public record AOC11InputData(List<Integer> stones) implements AOCInputData {
     }
 }
