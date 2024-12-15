@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static aoc.AOCMatrixUtils.DIRECTIONS;
-import static aoc.AOCMatrixUtils.calcNewPosition;
+import static aoc.AOCMatrixUtils.calcNewCoords;
 import static aoc.AOCMatrixUtils.getCoordsFromPosition;
 import static aoc.AOCMatrixUtils.getPositionFromCoords;
 import static aoc.AOCMatrixUtils.isOnField;
@@ -60,7 +60,7 @@ public class AOC10HoofIt implements AOCTask<AOC10HoofIt.AOC10InputData> {
         int[] coordsFromPosition = getCoordsFromPosition(currentPosition, inputData.fieldWidth());
 
         return DIRECTIONS.stream()
-                .map(direction -> calcNewPosition(coordsFromPosition, direction))
+                .map(direction -> calcNewCoords(coordsFromPosition, direction))
                 .filter(p -> isOnField(p[0], p[1], inputData.fieldWidth(), inputData.fieldHeight()))
                 .map(c -> getPositionFromCoords(c, inputData.fieldWidth()))
                 .filter(p -> inputData.field().get(p).equals(currentNumber))

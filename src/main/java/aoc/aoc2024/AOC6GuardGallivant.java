@@ -9,7 +9,7 @@ import java.util.Set;
 
 import static aoc.AOCMatrixUtils.DIRECTIONS;
 import static aoc.AOCMatrixUtils.UP_DIRECTION;
-import static aoc.AOCMatrixUtils.calcNewPosition;
+import static aoc.AOCMatrixUtils.calcNewCoords;
 import static aoc.AOCMatrixUtils.getCoordsFromPosition;
 import static aoc.AOCMatrixUtils.getPositionFromCoords;
 import static aoc.AOCMatrixUtils.isOutsideOfField;
@@ -36,7 +36,7 @@ public class AOC6GuardGallivant implements AOCTask<AOC6GuardGallivant.AOC6InputD
         while (!isOutsideOfField(guardCoords[0], guardCoords[1], fieldWidth, fieldHeight)) {
             guardUniquePositions.add(getPositionFromCoords(guardCoords, fieldWidth));
 
-            int[] nextPositionCoords = calcNewPosition(guardCoords, currentDirection);
+            int[] nextPositionCoords = calcNewCoords(guardCoords, currentDirection);
 
             if (isOutsideOfField(nextPositionCoords[0], nextPositionCoords[1], fieldWidth, fieldHeight)) {
                 break;
@@ -73,7 +73,7 @@ public class AOC6GuardGallivant implements AOCTask<AOC6GuardGallivant.AOC6InputD
 
                 guardUniquePositionsInCircle.putIfAbsent(guardPosition, currentDirection);
 
-                int[] nextPositionCoords = calcNewPosition(guardCoords, currentDirection);
+                int[] nextPositionCoords = calcNewCoords(guardCoords, currentDirection);
 
                 if (isOutsideOfField(nextPositionCoords[0], nextPositionCoords[1], fieldWidth, fieldHeight)) {
                     break;

@@ -20,7 +20,7 @@ public class AOCMatrixUtils {
         return row < 0 || row >= fieldWidth || column < 0 || column >= fieldHeight;
     }
 
-    public static int[] calcNewPosition(int[] coords, int[] direction) {
+    public static int[] calcNewCoords(int[] coords, int[] direction) {
         return new int[]{coords[0] + direction[0], coords[1] + direction[1]};
     }
 
