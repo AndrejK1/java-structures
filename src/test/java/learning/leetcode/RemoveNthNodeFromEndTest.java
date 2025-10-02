@@ -16,10 +16,10 @@ class RemoveNthNodeFromEndTest {
 
     @Test
     void removeNthFromEnd() {
-//        runTestCase(List.of(1, 2, 3, 4, 5), 2, List.of(1, 2, 3, 5));
-//        runTestCase(List.of(1, 2, 3, 4, 5), 5, List.of(2, 3, 4, 5));
-//        runTestCase(List.of(1, 2), 2, List.of(2));
-//        runTestCase(List.of(1, 2), 1, List.of(1));
+        runTestCase(List.of(1, 2, 3, 4, 5), 2, List.of(1, 2, 3, 5));
+        runTestCase(List.of(1, 2, 3, 4, 5), 5, List.of(2, 3, 4, 5));
+        runTestCase(List.of(1, 2), 2, List.of(2));
+        runTestCase(List.of(1, 2), 1, List.of(1));
         runTestCase(List.of(1), 1, List.of());
     }
 
